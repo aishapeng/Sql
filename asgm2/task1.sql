@@ -42,87 +42,162 @@ CREATE OR REPLACE PROCEDURE print_publication
         ORDER BY name ASC;
 
 BEGIN
+    --get author id
     SELECT aid INTO v_aid
     FROM author
     WHERE UPPER(name) = UPPER(p_name);
 
-    FOR v_rec IN cur_publicationList(v_aid) LOOP
-        --pubid
-        DBMS_OUTPUT.PUT_LINE('Pubid: '|| v_rec.pubid);
-        
-        --type
+    --open publication cursor to get author publications
+    IF NOT cur_publicationList%ISOPEN THEN
+        OPEN cur_publicationList(v_aid);
+    END IF;
+
+    --process publication cursor for details
+    LOOP
+        --get publication id
+        FETCH cur_publicationList INTO v_pubid;
+
+        --check the cursor
+        EXIT WHEN cur_publicationList%NOTFOUND;
+
+        --print publication id
+        DBMS_OUTPUT.PUT_LINE('Pubid: '|| v_pubid);
+
+        --get publication type
+        --check if type article
         IF v_found = 0 THEN
-            FOR v_rec_article IN cur_article(v_rec.pubid) LOOP
+            --open article cursor to check if publication id exist in it
+            IF NOT cur_article%ISOPEN THEN
+                OPEN cur_article(v_pubid);
+            END IF;
+
+            --process article cursor
+            LOOP
+                FETCH cur_article INTO v_article;
+
+                --check if publication id exist in article table
+                EXIT WHEN cur_article%NOTFOUND;
+
+                --if found
                 v_type := 'Article';
-                v_article.appearsin := v_rec_article.appearsin;
-                v_article.startpage := v_rec_article.startpage;
-                v_article.endpage := v_rec_article.endpage;
                 v_count_article := v_count_article+1;
                 v_found := 1;
             END LOOP;
+
+            --close the cursor
+            CLOSE cur_article;
+
+        --check if type book
         ELSIF v_found = 0 THEN
-            FOR v_rec_book IN cur_book(v_rec.pubid) LOOP
+            --open book cursor to check if publication id exist in it
+            IF NOT cur_book%ISOPEN THEN
+                OPEN cur_book(v_pubid);
+            END IF;
+
+            --process book cursor
+            LOOP
+                FETCH cur_book INTO v_book;
+
+                --check if publication id exist in article table
+                EXIT WHEN cur_book%NOTFOUND;
+
+                --if found
                 v_type := 'Book';
-                v_book.publisher := v_rec_book.publisher;
-                v_book.year := v_rec_book.year;
                 v_count_book := v_count_book+1;
                 v_found := 1;
             END LOOP;
+
+            --close the cursor
+            CLOSE cur_book;
+
+        --check if type journal
         ELSIF v_found = 0 THEN
-            FOR v_rec_journal IN cur_journal(v_rec.pubid) LOOP
+            --open journal cursor to check if publication id exist in it
+            IF NOT cur_journal%ISOPEN THEN
+                OPEN cur_journal(v_pubid);
+            END IF;
+
+            --process book cursor
+            LOOP
+                FETCH cur_journal INTO v_journal;
+
+                --check if publication id exist in article table
+                EXIT WHEN cur_journal%NOTFOUND;
+
+                --if found
                 v_type := 'Journal';
-                v_journal.volume := v_rec_journal.volume;
-                v_journal.num := v_rec_journal.num;
-                v_journal.year := v_rec_journal.year;
                 v_count_journal := v_count_journal+1;
                 v_found := 1;
             END LOOP;
+
+            --close the cursor
+            CLOSE cur_journal;
+
+        --check if type proceedings
         ELSIF v_found = 0 THEN
-            FOR v_rec_proceedings IN cur_proceedings(v_rec.pubid) LOOP
+            --open proceedings cursor to check if publication id exist in it
+            IF NOT cur_proceedings%ISOPEN THEN
+                OPEN cur_proceedings(v_pubid);
+            END IF;
+
+            --process proceedings cursor
+            LOOP
+                FETCH cur_proceedings INTO v_proceedings;
+
+                --check if publication id exist in article table
+                EXIT WHEN cur_proceedings%NOTFOUND;
+
+                --if found
                 v_type := 'Proceedings';
-                v_proceedings.year := v_rec_proceedings.year;
                 v_count_proceedings := v_count_proceedings+1;
                 v_found := 1;
             END LOOP;
+
+            --close the cursor
+            CLOSE cur_proceedings;
         END IF;
         v_found := 0;
 
-        --authors
-        DBMS_OUTPUT.PUT('Authors: ');
-        FOR v_rec_author IN cur_author(v_aid) LOOP
-            DBMS_OUTPUT.PUT_LINE(v_rec_author.name);
-        END LOOP;
+    --print authors
+    DBMS_OUTPUT.PUT('Authors: ');
+    FOR v_rec_author IN cur_author(v_aid) LOOP
+        DBMS_OUTPUT.PUT_LINE(v_rec_author.name);
+    END LOOP;
 
-        --title
-        SELECT title INTO v_title 
-        FROM publication WHERE v_rec.pubid=pubid;
+    --print title
+    SELECT title INTO v_title 
+    FROM publication WHERE v_pubid=pubid;
 
-        --publication details
-        CASE v_type
-            WHEN 'Article' THEN
-                DBMS_OUTPUT.PUT_LINE('Appears In: '|| v_article.appearsin);
-                DBMS_OUTPUT.PUT_LINE('Start Page: '||v_article.startpage);
-                DBMS_OUTPUT.PUT_LINE('End Page: '||v_article.endpage);
-            WHEN 'Book' THEN
-                DBMS_OUTPUT.PUT_LINE('Publisher: '|| v_book.publisher);
-                DBMS_OUTPUT.PUT_LINE('Year: '||v_book.year);   
-            WHEN 'Journal' THEN
-                DBMS_OUTPUT.PUT_LINE('Volume: '|| v_journal.volume);
-                DBMS_OUTPUT.PUT_LINE('Number: '||v_journal.num);   
-                DBMS_OUTPUT.PUT_LINE('Year: '|| v_journal.year);
-             WHEN 'Proceedings' THEN
-                DBMS_OUTPUT.PUT_LINE('Year: '||v_proceedings.year);   
-        END CASE;
+    --print publication details
+    CASE v_type
+        WHEN 'Article' THEN
+            DBMS_OUTPUT.PUT_LINE('Appears In: '|| v_article.appearsin);
+            DBMS_OUTPUT.PUT_LINE('Start Page: '||v_article.startpage);
+            DBMS_OUTPUT.PUT_LINE('End Page: '||v_article.endpage);
+        WHEN 'Book' THEN
+            DBMS_OUTPUT.PUT_LINE('Publisher: '|| v_book.publisher);
+            DBMS_OUTPUT.PUT_LINE('Year: '||v_book.year);   
+        WHEN 'Journal' THEN
+            DBMS_OUTPUT.PUT_LINE('Volume: '|| v_journal.volume);
+            DBMS_OUTPUT.PUT_LINE('Number: '||v_journal.num);   
+            DBMS_OUTPUT.PUT_LINE('Year: '|| v_journal.year);
+        WHEN 'Proceedings' THEN
+            DBMS_OUTPUT.PUT_LINE('Year: '||v_proceedings.year);   
+    END CASE;
 
-        DBMS_OUTPUT.PUT_LINE('-------------------------------------------');
+    DBMS_OUTPUT.PUT_LINE('-------------------------------------------');
+
     END LOOP;
     
-    --summary
+    --print summary
     DBMS_OUTPUT.PUT_LINE('Proceedings: '||v_count_proceedings);   
     DBMS_OUTPUT.PUT_LINE('Journal: '||v_count_journal); 
     DBMS_OUTPUT.PUT_LINE('Article: '||v_count_article); 
     DBMS_OUTPUT.PUT_LINE('Book: '||v_count_book); 
     DBMS_OUTPUT.PUT_LINE('Total Publication: '||cur_publicationList%ROWCOUNT); 
+
+    --close publication cursor
+    CLOSE cur_publicationList;
 
 --EXCEPTION
     --  WHEN OTHERS THEN
