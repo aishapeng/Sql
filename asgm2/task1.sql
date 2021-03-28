@@ -199,9 +199,9 @@ BEGIN
     --close publication cursor
     CLOSE cur_publicationList;
 
---EXCEPTION
-    --  WHEN OTHERS THEN
-    --     DBMS_OUTPUT.PUT_LINE('Error Code = #'|| SQLCODE);
-    --     DBMS_OUTPUT.PUT_LINE('Error Msg = '|| SQLERRM); 
+EXCEPTION
+     WHEN OTHERS THEN
+        DBMS_OUTPUT.PUT_LINE('Error Code = #'|| SQLCODE);
+        DBMS_OUTPUT.PUT_LINE('Error Msg = '|| SQLERRM); 
 END;
 /
