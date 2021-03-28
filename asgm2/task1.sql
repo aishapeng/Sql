@@ -200,6 +200,8 @@ BEGIN
     CLOSE cur_publicationList;
 
 EXCEPTION
+    WHEN NO_DATA_FOUND THEN
+        DBMS_OUTPUT.PUT_LINE('This author has no publication.');
      WHEN OTHERS THEN
         DBMS_OUTPUT.PUT_LINE('Error Code = #'|| SQLCODE);
         DBMS_OUTPUT.PUT_LINE('Error Msg = '|| SQLERRM); 
