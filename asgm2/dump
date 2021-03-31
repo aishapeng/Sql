@@ -14,7 +14,6 @@ CREATE OR REPLACE PROCEDURE print_publication
     v_count_author NUMBER := 0;
     v_total_count NUMBER := 0;
     v_found NUMBER := 0;
-    v_found_article NUMBER := 0;
 
     TYPE rec_pubid IS RECORD(
         pubid CHAR(10),
@@ -26,14 +25,6 @@ CREATE OR REPLACE PROCEDURE print_publication
     pubid_table1 pubid_table := pubid_table(); 
     temp rec_pubid;
 
-    TYPE name_table IS TABLE OF VARCHAR2(22);
-    name_table1 name_table := name_table();
-    idx INTEGER;
-
-    TYPE sort_table IS TABLE OF VARCHAR2(22) INDEX BY VARCHAR2(22);
-    sort_table1 sort_table;
-    idx_name VARCHAR2(22);
-
     v_proceedings proceedings%ROWTYPE;
     v_article article%ROWTYPE;
     v_book book%ROWTYPE;
@@ -44,15 +35,27 @@ CREATE OR REPLACE PROCEDURE print_publication
     e_nopublication EXCEPTION;
     PRAGMA EXCEPTION_INIT(e_nopublication, -20001);
 
-    CURSOR cur_author_id1(p_name VARCHAR2) IS
+    CURSOR cur_authorid(p_name VARCHAR2) IS
         SELECT aid
         FROM author
         WHERE UPPER(name) = UPPER(p_name);
 
-    CURSOR cur_wrote(p_aid VARCHAR2) IS
-        SELECT pubid
-        FROM wrote
-        WHERE aid = p_aid;
+    CURSOR cur_publicationList(p_aid VARCHAR2) IS
+        SELECT DISTINCT w.pubid AS pubid, 
+        CASE 
+            WHEN w.pubid = p.pubid THEN 'Proceedings'
+            WHEN w.pubid = b.pubid THEN 'Book'
+            WHEN w.pubid = j.pubid THEN 'Journal'
+            WHEN w.pubid = a.pubid THEN 'Article'
+        END type
+        FROM wrote w, proceedings p, book b, journal j, article a
+        WHERE w.aid = p_aid
+        AND (
+            w.pubid = p.pubid OR
+            w.pubid = b.pubid OR
+            w.pubid = j.pubid OR
+            w.pubid = a.pubid
+        );
 
     CURSOR cur_proceedings(p_pubid CHAR) IS
         SELECT * FROM proceedings
@@ -70,13 +73,11 @@ CREATE OR REPLACE PROCEDURE print_publication
         SELECT * FROM article
         WHERE pubid = p_pubid;
 
-    CURSOR cur_author_id2(p_pubid CHAR) IS 
-        SELECT aid FROM wrote 
-        WHERE pubid = p_pubid;
-
-    CURSOR cur_author_name(p_aid VARCHAR2) IS 
-        SELECT name FROM author 
-        WHERE aid = p_aid;
+    CURSOR cur_author_name(p_pubid CHAR) IS 
+        SELECT name FROM author a, wrote w
+        WHERE a.aid = w.aid
+        AND w.pubid = p_pubid
+        ORDER BY name;
 
     CURSOR cur_title(p_pubid CHAR) IS 
         SELECT title FROM publication 
@@ -84,164 +85,156 @@ CREATE OR REPLACE PROCEDURE print_publication
 
 BEGIN
     --Get author id--
-    IF NOT cur_author_id1%ISOPEN THEN
-        OPEN cur_author_id1(p_name);
+    IF NOT cur_authorid%ISOPEN THEN
+        OPEN cur_authorid(p_name);
     END IF;
     LOOP
-        FETCH cur_author_id1 INTO v_aid;
-        EXIT WHEN cur_author_id1%NOTFOUND;
+        FETCH cur_authorid INTO v_aid;
+        EXIT WHEN cur_authorid%NOTFOUND;
     END LOOP;
     --Raise excpetion if no author found
-    IF cur_author_id1%ROWCOUNT = 0 THEN
+    IF cur_authorid%ROWCOUNT = 0 THEN
         RAISE e_noauthor;
     END IF;
-    CLOSE cur_author_id1;
+    CLOSE cur_authorid;
 
-    --Get publication list--
-    IF NOT cur_wrote%ISOPEN THEN
-        OPEN cur_wrote(v_aid);
+    --Get publication list
+    IF NOT cur_publicationList%ISOPEN THEN
+        OPEN cur_publicationList(v_aid);
     END IF;
     LOOP
-        FETCH cur_wrote INTO v_pubid;
-        EXIT WHEN cur_wrote%NOTFOUND;
+        FETCH cur_publicationList INTO v_pubid, v_type;
+        EXIT WHEN cur_publicationList%NOTFOUND;
+        DBMS_OUTPUT.PUT_LINE(v_pubid||v_type);
         --Add publication details into table
-        IF v_found = 0 THEN
-            --Get article details
-            IF NOT cur_article%ISOPEN THEN
-                OPEN cur_article(v_pubid);
-            END IF;
-            LOOP
-                FETCH cur_article INTO v_article;
-                EXIT WHEN cur_article%NOTFOUND;
-                v_count_article := v_count_article+1;
-
-                --Check if appears in book
-                IF v_found_article = 0 THEN
-                    IF NOT cur_book%ISOPEN THEN
-                        OPEN cur_book(v_article.appearsin);
-                    END IF;
-                    LOOP
-                        FETCH cur_book INTO v_book;
-                        EXIT WHEN cur_book%NOTFOUND;
-                        rec_pubid1.pubid := v_pubid;
-                        rec_pubid1.year := v_book.year;
-                        rec_pubid1.type := 'Article';
-                        pubid_table1.EXTEND;
-                        pubid_table1(pubid_table1.LAST) := rec_pubid1;
-                        v_found_article := 1;
-                        DBMS_OUTPUT.PUT_LINE(pubid_table1(pubid_table1.LAST).pubid);
-                    END LOOP;
-                    CLOSE cur_book;
-                END IF;  
-
-                --Check if appears in journal
-                IF v_found_article = 0 THEN
-                    IF NOT cur_journal%ISOPEN THEN
-                        OPEN cur_journal(v_article.appearsin);
-                    END IF;
-                    LOOP
-                        FETCH cur_journal INTO v_journal;
-                        EXIT WHEN cur_journal%NOTFOUND;
-                        rec_pubid1.pubid := v_pubid;
-                        rec_pubid1.year := v_journal.year;
-                        rec_pubid1.type := 'Article';
-                        pubid_table1.EXTEND;
-                        pubid_table1(pubid_table1.LAST) := rec_pubid1;
-                        v_found_article := 1;
-                    END LOOP;
-                    CLOSE cur_journal;
+        CASE v_type
+            WHEN 'Article' THEN 
+                --Get article details
+                IF NOT cur_article%ISOPEN THEN
+                    OPEN cur_article(v_pubid);
                 END IF;
+                LOOP
+                    FETCH cur_article INTO v_article;
+                    EXIT WHEN cur_article%NOTFOUND;
+                    v_count_article := v_count_article+1;
 
-                --Check if appears in proceedings
-                IF v_found_article = 0 THEN
-                    IF NOT cur_proceedings%ISOPEN THEN
-                        OPEN cur_proceedings(v_article.appearsin);
+                    --Check if appears in book
+                    IF v_found = 0 THEN
+                        IF NOT cur_book%ISOPEN THEN
+                            OPEN cur_book(v_article.appearsin);
+                        END IF;
+                        LOOP
+                            FETCH cur_book INTO v_book;
+                            EXIT WHEN cur_book%NOTFOUND;
+                            rec_pubid1.pubid := v_pubid;
+                            rec_pubid1.year := v_book.year;
+                            rec_pubid1.type := 'Article';
+                            pubid_table1.EXTEND;
+                            pubid_table1(pubid_table1.LAST) := rec_pubid1;
+                            v_found := 1;
+                        END LOOP;
+                        CLOSE cur_book;
+                    END IF;  
+
+                    --Check if appears in journal
+                    IF v_found = 0 THEN
+                        IF NOT cur_journal%ISOPEN THEN
+                            OPEN cur_journal(v_article.appearsin);
+                        END IF;
+                        LOOP
+                            FETCH cur_journal INTO v_journal;
+                            EXIT WHEN cur_journal%NOTFOUND;
+                            rec_pubid1.pubid := v_pubid;
+                            rec_pubid1.year := v_journal.year;
+                            rec_pubid1.type := 'Article';
+                            pubid_table1.EXTEND;
+                            pubid_table1(pubid_table1.LAST) := rec_pubid1;
+                            v_found := 1;
+                        END LOOP;
+                        CLOSE cur_journal;
                     END IF;
-                    LOOP
-                        FETCH cur_proceedings INTO v_proceedings;
-                        EXIT WHEN cur_proceedings%NOTFOUND;
-                        rec_pubid1.pubid := v_pubid;
-                        rec_pubid1.year := v_proceedings.year;
-                        rec_pubid1.type := 'Article';
-                        pubid_table1.EXTEND;
-                        pubid_table1(pubid_table1.LAST) := rec_pubid1;
-                        v_found_article := 1;
-                    END LOOP;
-                    CLOSE cur_proceedings;
+
+                    --Check if appears in proceedings
+                    IF v_found = 0 THEN
+                        IF NOT cur_proceedings%ISOPEN THEN
+                            OPEN cur_proceedings(v_article.appearsin);
+                        END IF;
+                        LOOP
+                            FETCH cur_proceedings INTO v_proceedings;
+                            EXIT WHEN cur_proceedings%NOTFOUND;
+                            rec_pubid1.pubid := v_pubid;
+                            rec_pubid1.year := v_proceedings.year;
+                            rec_pubid1.type := 'Article';
+                            pubid_table1.EXTEND;
+                            pubid_table1(pubid_table1.LAST) := rec_pubid1;
+                            v_found := 1;
+                        END LOOP;
+                        CLOSE cur_proceedings;
+                    END IF;
+
+                    v_found := 0;
+
+                END LOOP;            
+                CLOSE cur_article;
+
+            WHEN 'Book' THEN
+                IF NOT cur_book%ISOPEN THEN
+                    OPEN cur_book(v_pubid);
                 END IF;
+                LOOP
+                    FETCH cur_book INTO v_book;
+                    EXIT WHEN cur_book%NOTFOUND;
+                    rec_pubid1.pubid := v_pubid;
+                    rec_pubid1.year := v_book.year;
+                    rec_pubid1.type := v_type;
+                    pubid_table1.EXTEND;
+                    pubid_table1(pubid_table1.LAST) := rec_pubid1;
+                    v_count_book := v_count_book+1;
+                END LOOP;
+                CLOSE cur_book;
 
-                v_found := 1;
-                v_found_article := 0;
+            WHEN 'Journal' THEN
+                IF NOT cur_journal%ISOPEN THEN
+                    OPEN cur_journal(v_pubid);
+                END IF;
+                LOOP
+                    FETCH cur_journal INTO v_journal;
+                    EXIT WHEN cur_journal%NOTFOUND;
+                    rec_pubid1.pubid := v_pubid;
+                    rec_pubid1.year := v_journal.year;
+                    rec_pubid1.type := v_type;
+                    pubid_table1.EXTEND;
+                    pubid_table1(pubid_table1.LAST) := rec_pubid1;
+                    v_count_journal := v_count_journal+1;
+                END LOOP;
+                CLOSE cur_journal;
 
-            END LOOP;            
-            CLOSE cur_article;
-        END IF;
+            WHEN 'Proceedings' THEN
+                IF NOT cur_proceedings%ISOPEN THEN
+                    OPEN cur_proceedings(v_pubid);
+                END IF;
+                LOOP
+                    FETCH cur_proceedings INTO v_proceedings;
+                    EXIT WHEN cur_proceedings%NOTFOUND;
+                    rec_pubid1.pubid := v_pubid;
+                    rec_pubid1.year := v_proceedings.year;
+                    rec_pubid1.type := v_type;
+                    pubid_table1.EXTEND;
+                    pubid_table1(pubid_table1.LAST) := rec_pubid1;
+                    v_count_proceedings := v_count_proceedings+1;
+                END LOOP;
+                CLOSE cur_proceedings; 
 
-        IF v_found = 0 THEN
-            IF NOT cur_book%ISOPEN THEN
-                OPEN cur_book(v_pubid);
-            END IF;
-            LOOP
-                FETCH cur_book INTO v_book;
-                EXIT WHEN cur_book%NOTFOUND;
-                rec_pubid1.pubid := v_pubid;
-                rec_pubid1.year := v_book.year;
-                rec_pubid1.type := 'Book';
-                pubid_table1.EXTEND;
-                pubid_table1(pubid_table1.LAST) := rec_pubid1;
-                v_count_book := v_count_book+1;
-                v_found := 1;
-            END LOOP;
-            CLOSE cur_book;
-        END IF;
-
-        IF v_found = 0 THEN
-            IF NOT cur_journal%ISOPEN THEN
-                OPEN cur_journal(v_pubid);
-            END IF;
-            LOOP
-                FETCH cur_journal INTO v_journal;
-                EXIT WHEN cur_journal%NOTFOUND;
-                rec_pubid1.pubid := v_pubid;
-                rec_pubid1.year := v_journal.year;
-                rec_pubid1.type := 'Journal';
-                pubid_table1.EXTEND;
-                pubid_table1(pubid_table1.LAST) := rec_pubid1;
-                v_count_journal := v_count_journal+1;
-                v_found := 1;
-            END LOOP;
-            CLOSE cur_journal;
-        END IF;
-
-        IF v_found = 0 THEN
-            IF NOT cur_proceedings%ISOPEN THEN
-                OPEN cur_proceedings(v_pubid);
-            END IF;
-            LOOP
-                FETCH cur_proceedings INTO v_proceedings;
-                EXIT WHEN cur_proceedings%NOTFOUND;
-                rec_pubid1.pubid := v_pubid;
-                rec_pubid1.year := v_proceedings.year;
-                rec_pubid1.type := 'Proceedings';
-                pubid_table1.EXTEND;
-                pubid_table1(pubid_table1.LAST) := rec_pubid1;
-                v_count_proceedings := v_count_proceedings+1;
-                v_found := 1;
-            END LOOP;
-            CLOSE cur_proceedings; 
-        END IF;
-
-        v_found := 0;
-
+        END CASE;
     END LOOP;
 
-    IF cur_wrote%ROWCOUNT = 0 THEN
+    IF cur_publicationList%ROWCOUNT = 0 THEN
         RAISE e_nopublication;
     ELSE 
-        v_total_count := cur_wrote%ROWCOUNT;
+        v_total_count := cur_publicationList%ROWCOUNT;
     END IF;
     
-    CLOSE cur_wrote;
+    CLOSE cur_publicationList;
 
     --Sort table with year
     FOR i IN pubid_table1.FIRST..pubid_table1.LAST-1 LOOP
@@ -256,51 +249,25 @@ BEGIN
 
     --Print publication from sorted table
     FOR i IN pubid_table1.FIRST..pubid_table1.LAST LOOP
+
         --Print publication id
         DBMS_OUTPUT.PUT_LINE('Pubid: '|| pubid_table1(i).pubid);
 
         --Print publication type
         DBMS_OUTPUT.PUT_LINE('Type: '|| pubid_table1(i).type);
 
-        --Get authors name into table
+        --Print authors name
         DBMS_OUTPUT.PUT('Authors: ');
-        --Get all authors who wrote this publication
-        IF NOT cur_author_id2%ISOPEN THEN
-            OPEN cur_author_id2(pubid_table1(i).pubid);
+        IF NOT cur_author_name%ISOPEN THEN
+            OPEN cur_author_name(pubid_table1(i).pubid);
         END IF;
         LOOP
-            FETCH cur_author_id2 INTO v_aid;
-            EXIT WHEN cur_author_id2%NOTFOUND;
-            --Get authors name
-            IF NOT cur_author_name%ISOPEN THEN
-                OPEN cur_author_name(v_aid);
-            END IF;
-            LOOP
-                FETCH cur_author_name INTO v_name;
-                EXIT WHEN cur_author_name%NOTFOUND;
-                name_table1.EXTEND;
-                name_table1(name_table1.LAST) := v_name;
-            END LOOP;
-            CLOSE cur_author_name;
-        END LOOP;
-        CLOSE cur_author_id2;
-
-        --Sort author names in table
-        idx := name_table1.FIRST;
-        LOOP
-            --sort_table is index by varchar2
-            sort_table1(name_table1(idx)) := name_table1(idx);
-            idx := name_table1.NEXT(idx);
-            EXIT WHEN idx IS NULL;
-        END LOOP;
-
-        v_name := sort_table1.FIRST;
-        LOOP
+            FETCH cur_author_name INTO v_name;
+            EXIT WHEN cur_author_name%NOTFOUND;
             DBMS_OUTPUT.PUT(v_name||'; ');
-            v_name := sort_table1.NEXT(v_name);
-            EXIT WHEN v_name IS NULL;
         END LOOP;
         DBMS_OUTPUT.NEW_LINE;
+        CLOSE cur_author_name;
 
         --Print title
         IF NOT cur_title%ISOPEN THEN
@@ -329,7 +296,7 @@ BEGIN
                         END IF;
                         LOOP
                             FETCH cur_book INTO v_book;
-                            EXIT WHEN cur_book%NOTFOUND;
+                            EXIT WHEN cur_article%NOTFOUND;
                             DBMS_OUTPUT.PUT_LINE('Appears In Book: '|| v_article.appearsin);
                             DBMS_OUTPUT.PUT_LINE('Start Page: '|| v_article.startpage);
                             DBMS_OUTPUT.PUT_LINE('End Page: '|| v_article.endpage);
@@ -337,7 +304,6 @@ BEGIN
                             DBMS_OUTPUT.PUT_LINE('Year: '|| v_book.year);
                             v_found := 1;
                         END LOOP;
-                        CLOSE cur_book;
                     END IF;
 
                     IF v_found = 0 THEN
@@ -355,7 +321,6 @@ BEGIN
                             DBMS_OUTPUT.PUT_LINE('Year: '|| v_journal.year);
                             v_found := 1;
                         END LOOP;
-                        CLOSE cur_journal;
                     END IF;
 
                     IF v_found = 0 THEN
@@ -371,7 +336,6 @@ BEGIN
                             DBMS_OUTPUT.PUT_LINE('Year: '|| v_proceedings.year);
                             v_found := 1;
                         END LOOP;
-                        CLOSE cur_proceedings;
                     END IF;
                     v_found := 0;
                 END LOOP;
@@ -413,7 +377,6 @@ BEGIN
                 END LOOP;
                 CLOSE cur_proceedings;        
         END CASE;
-        DBMS_OUTPUT.PUT_LINE('--------------------------------------------');
     END LOOP;    
     
     --Print summary
