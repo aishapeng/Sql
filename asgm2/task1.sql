@@ -428,8 +428,8 @@ EXCEPTION
         DBMS_OUTPUT.PUT_LINE('Error: Author does not exist in database.');
     WHEN e_nopublication THEN
         DBMS_OUTPUT.PUT_LINE('Error: Author has no publication.');
-    -- WHEN OTHERS THEN
-    --     DBMS_OUTPUT.PUT_LINE('Error Code = #'|| SQLCODE);
-    --     DBMS_OUTPUT.PUT_LINE('Error Msg = '|| SQLERRM); 
+    WHEN OTHERS THEN
+        DBMS_OUTPUT.PUT_LINE('Error Code = #'|| SQLCODE);
+        DBMS_OUTPUT.PUT_LINE('Error Msg = '|| SQLERRM); 
 END;
 /

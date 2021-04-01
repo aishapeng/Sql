@@ -301,6 +301,9 @@ BEGIN
         DBMS_OUTPUT.NEW_LINE;
     END IF;
     v_found := 0;
-
+EXCEPTION
+    WHEN OTHERS THEN
+        DBMS_OUTPUT.PUT_LINE('Error Code = #'|| SQLCODE);
+        DBMS_OUTPUT.PUT_LINE('Error Msg = '|| SQLERRM); 
 END;
 /
