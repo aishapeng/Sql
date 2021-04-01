@@ -1,16 +1,19 @@
 drop table Publication_master;
+
 CREATE TABLE publication_master(
-    pubid VARCHAR2(15),
+    pubid CHAR(10),
     title VARCHAR2(70),
     type VARCHAR2(20), 
     detail1 VARCHAR2(50),
     detail2 VARCHAR2(50),
     detail3 VARCHAR2(50),
-    detail4 VARCHAR2(50)
+    detail4 VARCHAR2(50),
+    FOREIGN KEY (pubid) REFERENCES publication(pubid),
+    CONSTRAINT exist_record UNIQUE(pubid)
 );
 
 CREATE OR REPLACE PROCEDURE merge_publication AS 
-    v_pubid VARCHAR2(15);
+    v_pubid VARCHAR2(10);
     v_title VARCHAR2(70);
     v_type CHAR(20);
     v_year CHAR(10);
@@ -22,11 +25,15 @@ CREATE OR REPLACE PROCEDURE merge_publication AS
     v_endpage CHAR(5);
 
     v_found NUMBER := 0;
+    v_missing NUMBER := 0;
     v_total INTEGER := 0;
     v_counter_proceedings INTEGER := 0;
     v_counter_journal INTEGER := 0;
     v_counter_book INTEGER := 0;
     v_counter_article INTEGER := 0;
+
+    TYPE missing_table IS TABLE OF VARCHAR2(10);
+    missing_table1 missing_table := missing_table();
 
     CURSOR cur_publication IS
         SELECT * 
@@ -80,6 +87,7 @@ BEGIN
     LOOP
         FETCH cur_publication INTO v_pubid, v_title;
         EXIT WHEN cur_publication%NOTFOUND;
+        v_found := 0;
 
         --Insert proceedings details-- 
         IF v_found = 0 THEN
@@ -144,7 +152,13 @@ BEGIN
             END LOOP;
             CLOSE cur_article;
         END IF;
-        v_found := 0;
+
+        --Check missing publication--
+        IF v_found = 0 THEN
+            missing_table1.EXTEND;
+            missing_table1(missing_table1.LAST) := v_pubid;
+            v_missing := v_missing+1;
+        END IF;
 
     END LOOP;
     CLOSE cur_publication;
@@ -153,14 +167,23 @@ BEGIN
     v_total := v_counter_proceedings + v_counter_book + v_counter_journal + v_counter_article;
     DBMS_OUTPUT.NEW_LINE;
     DBMS_OUTPUT.PUT_LINE('Total: '||v_total||' new records posted into publication_master table.');
-    DBMS_OUTPUT.PUT_LINE('--------------------------------------');
+    DBMS_OUTPUT.PUT_LINE('----------------------------------------------------------------------');
     DBMS_OUTPUT.PUT_LINE('Proceedings: '||v_counter_proceedings);
     DBMS_OUTPUT.PUT_LINE('Journal: '||v_counter_journal);
     DBMS_OUTPUT.PUT_LINE('Book: '||v_counter_book);
     DBMS_OUTPUT.PUT_LINE('Article: '||v_counter_article);
     DBMS_OUTPUT.NEW_LINE;
 
-    
+    --Print if any missing publication--
+    IF v_missing > 0 THEN
+        DBMS_OUTPUT.PUT_LINE('Insert Fail: '||v_missing||' publication(s) with missing details.');
+        DBMS_OUTPUT.PUT_LINE('-----------------------------------------------------------------');
+        FOR i IN missing_table1.FIRST..missing_table1.LAST LOOP
+            DBMS_OUTPUT.PUT_LINE('Missing Pubid '||i||': '||missing_table1(i));
+        END LOOP;
+        DBMS_OUTPUT.NEW_LINE;
+    END IF;
+
     --Print all posted proceedings--
     IF NOT cur_print_proceedings%ISOPEN THEN
         OPEN cur_print_proceedings;
