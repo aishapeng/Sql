@@ -91,7 +91,7 @@ BEGIN
         FETCH cur_author_id1 INTO v_aid;
         EXIT WHEN cur_author_id1%NOTFOUND;
     END LOOP;
-    --Raise excpetion if no author found
+    --Raise excpetion if no author found--
     IF cur_author_id1%ROWCOUNT = 0 THEN
         RAISE e_noauthor;
     END IF;
@@ -104,9 +104,9 @@ BEGIN
     LOOP
         FETCH cur_wrote INTO v_pubid;
         EXIT WHEN cur_wrote%NOTFOUND;
-        --Add publication details into table
+        --Add publication details into table--
         IF v_found = 0 THEN
-            --Get article details
+            --Get article details--
             IF NOT cur_article%ISOPEN THEN
                 OPEN cur_article(v_pubid);
             END IF;
@@ -115,7 +115,7 @@ BEGIN
                 EXIT WHEN cur_article%NOTFOUND;
                 v_count_article := v_count_article+1;
 
-                --Check if appears in book
+                --Check if appears in book--
                 IF v_found_article = 0 THEN
                     IF NOT cur_book%ISOPEN THEN
                         OPEN cur_book(v_article.appearsin);
@@ -134,7 +134,7 @@ BEGIN
                     CLOSE cur_book;
                 END IF;  
 
-                --Check if appears in journal
+                --Check if appears in journal--
                 IF v_found_article = 0 THEN
                     IF NOT cur_journal%ISOPEN THEN
                         OPEN cur_journal(v_article.appearsin);
@@ -152,7 +152,7 @@ BEGIN
                     CLOSE cur_journal;
                 END IF;
 
-                --Check if appears in proceedings
+                --Check if appears in proceedings--
                 IF v_found_article = 0 THEN
                     IF NOT cur_proceedings%ISOPEN THEN
                         OPEN cur_proceedings(v_article.appearsin);
@@ -178,6 +178,7 @@ BEGIN
         END IF;
 
         IF v_found = 0 THEN
+            --Get book details--
             IF NOT cur_book%ISOPEN THEN
                 OPEN cur_book(v_pubid);
             END IF;
@@ -196,6 +197,7 @@ BEGIN
         END IF;
 
         IF v_found = 0 THEN
+            --Get journal details--
             IF NOT cur_journal%ISOPEN THEN
                 OPEN cur_journal(v_pubid);
             END IF;
@@ -214,6 +216,7 @@ BEGIN
         END IF;
 
         IF v_found = 0 THEN
+            --Get proceedings details--
             IF NOT cur_proceedings%ISOPEN THEN
                 OPEN cur_proceedings(v_pubid);
             END IF;
@@ -243,7 +246,7 @@ BEGIN
     
     CLOSE cur_wrote;
 
-    --Sort table with year
+    --Sort table with year--
     FOR i IN pubid_table1.FIRST..pubid_table1.LAST-1 LOOP
         FOR j IN pubid_table1.FIRST..pubid_table1.LAST-1 LOOP
             IF pubid_table1(j).year > pubid_table1(j+1).year THEN
@@ -254,24 +257,26 @@ BEGIN
         END LOOP;
     END LOOP;
 
-    --Print publication from sorted table
+    --Print publication from sorted table--
     FOR i IN pubid_table1.FIRST..pubid_table1.LAST LOOP
-        --Print publication id
+
+        --Print publication id--
         DBMS_OUTPUT.PUT_LINE('Pubid: '|| pubid_table1(i).pubid);
 
-        --Print publication type
+        --Print publication type--
         DBMS_OUTPUT.PUT_LINE('Type: '|| pubid_table1(i).type);
 
-        --Get authors name into table
+        --Get authors name into table--
         DBMS_OUTPUT.PUT('Authors: ');
-        --Get all authors who wrote this publication
+
+        --Get all authors who wrote this publication--
         IF NOT cur_author_id2%ISOPEN THEN
             OPEN cur_author_id2(pubid_table1(i).pubid);
         END IF;
         LOOP
             FETCH cur_author_id2 INTO v_aid;
             EXIT WHEN cur_author_id2%NOTFOUND;
-            --Get authors name
+            --Get authors name--
             IF NOT cur_author_name%ISOPEN THEN
                 OPEN cur_author_name(v_aid);
             END IF;
@@ -285,24 +290,26 @@ BEGIN
         END LOOP;
         CLOSE cur_author_id2;
 
-        --Sort author names in table
+        --Sort author names in table--
         idx := name_table1.FIRST;
         LOOP
-            --sort_table is index by varchar2
+            --sort_table is index by varchar2--
             sort_table1(name_table1(idx)) := name_table1(idx);
             idx := name_table1.NEXT(idx);
             EXIT WHEN idx IS NULL;
         END LOOP;
 
+        --Get first name in sort_table--
         v_name := sort_table1.FIRST;
         LOOP
             DBMS_OUTPUT.PUT(v_name||'; ');
+            --Get next name in sort_table--
             v_name := sort_table1.NEXT(v_name);
             EXIT WHEN v_name IS NULL;
         END LOOP;
         DBMS_OUTPUT.NEW_LINE;
 
-        --Print title
+        --Print title--
         IF NOT cur_title%ISOPEN THEN
             OPEN cur_title(pubid_table1(i).pubid);
         END IF;
@@ -313,10 +320,10 @@ BEGIN
         END LOOP;
         CLOSE cur_title;
 
-        --Print publication details
+        --Print publication details--
         CASE pubid_table1(i).type
             WHEN 'Article' THEN 
-                --Get article details
+                --Get article details--
                 IF NOT cur_article%ISOPEN THEN
                     OPEN cur_article(pubid_table1(i).pubid);
                 END IF;
@@ -377,6 +384,7 @@ BEGIN
                 END LOOP;
                 CLOSE cur_article;
 
+            --Get book details--
             WHEN 'Book' THEN
                 IF NOT cur_book%ISOPEN THEN
                     OPEN cur_book(pubid_table1(i).pubid);
@@ -389,6 +397,7 @@ BEGIN
                 END LOOP;
                 CLOSE cur_book;
 
+            --Get journal details--
             WHEN 'Journal' THEN
                 IF NOT cur_journal%ISOPEN THEN
                     OPEN cur_journal(pubid_table1(i).pubid);
@@ -402,6 +411,7 @@ BEGIN
                 END LOOP;
                 CLOSE cur_journal;
 
+            --Get proccedings details--
             WHEN 'Proceedings' THEN
                 IF NOT cur_proceedings%ISOPEN THEN
                     OPEN cur_proceedings(pubid_table1(i).pubid);
@@ -416,7 +426,7 @@ BEGIN
         DBMS_OUTPUT.PUT_LINE('--------------------------------------------');
     END LOOP;    
     
-    --Print summary
+    --Print summary--
     DBMS_OUTPUT.PUT_LINE('Proceedings: '||v_count_proceedings);   
     DBMS_OUTPUT.PUT_LINE('Journal: '||v_count_journal); 
     DBMS_OUTPUT.PUT_LINE('Article: '||v_count_article); 
