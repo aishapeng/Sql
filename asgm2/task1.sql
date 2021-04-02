@@ -105,6 +105,7 @@ BEGIN
         FETCH cur_wrote INTO v_pubid;
         EXIT WHEN cur_wrote%NOTFOUND;
         --Add publication details into table--
+        --Check if pubid is found--
         IF v_found = 0 THEN
             --Get article details--
             IF NOT cur_article%ISOPEN THEN
@@ -177,6 +178,7 @@ BEGIN
             CLOSE cur_article;
         END IF;
 
+        --Check if pubid is found--
         IF v_found = 0 THEN
             --Get book details--
             IF NOT cur_book%ISOPEN THEN
@@ -196,6 +198,7 @@ BEGIN
             CLOSE cur_book;
         END IF;
 
+        --Check if pubid is found--
         IF v_found = 0 THEN
             --Get journal details--
             IF NOT cur_journal%ISOPEN THEN
@@ -215,6 +218,7 @@ BEGIN
             CLOSE cur_journal;
         END IF;
 
+        --Check if pubid is found--
         IF v_found = 0 THEN
             --Get proceedings details--
             IF NOT cur_proceedings%ISOPEN THEN
