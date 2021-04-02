@@ -9,20 +9,20 @@ CREATE TABLE publication_master(
     detail3 VARCHAR2(50),
     detail4 VARCHAR2(50),
     FOREIGN KEY (pubid) REFERENCES publication(pubid),
-    CONSTRAINT exist_record UNIQUE(pubid)
+    PRIMARY KEY (pubid)
 );
 
 CREATE OR REPLACE PROCEDURE merge_publication AS 
     v_pubid VARCHAR2(10);
     v_title VARCHAR2(70);
-    v_type CHAR(20);
-    v_year CHAR(10);
-    v_volume CHAR(10);
-    v_num CHAR(5);
-    v_publisher CHAR(50);
-    v_appearsin CHAR(15);
-    v_startpage CHAR(5);
-    v_endpage CHAR(5);
+    v_type VARCHAR2(20);
+    v_year NUMBER;
+    v_volume NUMBER;
+    v_num NUMBER;
+    v_publisher VARCHAR2(50);
+    v_appearsin VARCHAR2(15);
+    v_startpage NUMBER;
+    v_endpage NUMBER;
 
     v_found NUMBER := 0;
     v_missing NUMBER := 0;

@@ -302,7 +302,8 @@ BEGIN
         --Get first name in sort_table--
         v_name := sort_table1.FIRST;
         LOOP
-            DBMS_OUTPUT.PUT(v_name||'; ');
+            DBMS_OUTPUT.PUT(
+                v_name||'; ');
             --Get next name in sort_table--
             v_name := sort_table1.NEXT(v_name);
             EXIT WHEN v_name IS NULL;
