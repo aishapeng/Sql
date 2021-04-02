@@ -26,11 +26,11 @@ CREATE OR REPLACE PROCEDURE merge_publication AS
 
     v_found NUMBER := 0;
     v_missing NUMBER := 0;
-    v_total INTEGER := 0;
-    v_counter_proceedings INTEGER := 0;
-    v_counter_journal INTEGER := 0;
-    v_counter_book INTEGER := 0;
-    v_counter_article INTEGER := 0;
+    v_total NUMBER := 0;
+    v_counter_proceedings NUMBER := 0;
+    v_counter_journal NUMBER := 0;
+    v_counter_book NUMBER := 0;
+    v_counter_article NUMBER := 0;
 
     TYPE missing_table IS TABLE OF VARCHAR2(10);
     missing_table1 missing_table := missing_table();
