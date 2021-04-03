@@ -7,7 +7,10 @@ CREATE OR REPLACE PROCEDURE print_article (p_pubid CHAR) AS
 		ORDER BY CAST(detail2 AS INT) ASC;
 		
 	article_rec print_article_cur%rowtype;
-	v_found NUMBER := 0;	
+	v_found NUMBER := 0;
+
+	e_nopublication EXCEPTION;
+    PRAGMA EXCEPTION_INIT(e_nopublication, -20000);	
    
 BEGIN 
    
@@ -41,6 +44,8 @@ BEGIN
     v_found := 0;
 
 EXCEPTION
+	WHEN e_nopublication THEN
+        DBMS_OUTPUT.PUT_LINE('Error: No publication.');
     WHEN OTHERS THEN
         DBMS_OUTPUT.PUT_LINE('Error Code = #'|| SQLCODE);
         DBMS_OUTPUT.PUT_LINE('Error Msg = '|| SQLERRM); 
