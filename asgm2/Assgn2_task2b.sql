@@ -3,7 +3,7 @@ CREATE OR REPLACE PROCEDURE print_article (p_pubid CHAR) AS
         SELECT pubid, title, type, detail1, detail2, detail3
 		FROM publication_master
         WHERE type = 'Article'
-		AND TRIM(detail1) = p_pubid
+		AND TRIM(detail1) = UPPER(p_pubid)
 		ORDER BY CAST(detail2 AS INT) ASC;
 		
 	article_rec print_article_cur%rowtype;
@@ -36,7 +36,7 @@ BEGIN
         LOOP
             FETCH print_article_cur INTO article_rec;
             EXIT WHEN print_article_cur%NOTFOUND;
-            DBMS_OUTPUT.PUT_LINE(article_rec.pubid||'   '||article_rec.title||article_rec.type||'       '||article_rec.detail1||'        '||article_rec.detail2||'          '||article_rec.detail3);
+            DBMS_OUTPUT.PUT_LINE(article_rec.pubid||'   '||article_rec.title||article_rec.type||'       '||article_rec.detail1||'        '||article_rec.detail2||'		'||article_rec.detail3);
         END LOOP;
         CLOSE print_article_cur;
         DBMS_OUTPUT.NEW_LINE;
