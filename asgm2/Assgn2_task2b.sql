@@ -47,7 +47,7 @@ BEGIN
 
 EXCEPTION
 	WHEN e_nopublication THEN
-        DBMS_OUTPUT.PUT_LINE('Error: No publication.');
+        DBMS_OUTPUT.PUT_LINE('Error: No article found in this publication.');
     WHEN OTHERS THEN
         DBMS_OUTPUT.PUT_LINE('Error Code = #'|| SQLCODE);
         DBMS_OUTPUT.PUT_LINE('Error Msg = '|| SQLERRM); 
