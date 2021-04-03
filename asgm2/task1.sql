@@ -26,13 +26,8 @@ CREATE OR REPLACE PROCEDURE print_publication
     pubid_table1 pubid_table := pubid_table(); 
     temp rec_pubid;
 
-    TYPE name_table IS TABLE OF VARCHAR2(22);
-    name_table1 name_table := name_table();
-    idx INTEGER;
-
     TYPE sort_table IS TABLE OF VARCHAR2(22) INDEX BY VARCHAR2(22);
     sort_table1 sort_table;
-    idx_name VARCHAR2(22);
 
     v_proceedings proceedings%ROWTYPE;
     v_article article%ROWTYPE;
@@ -287,21 +282,11 @@ BEGIN
             LOOP
                 FETCH cur_author_name INTO v_name;
                 EXIT WHEN cur_author_name%NOTFOUND;
-                name_table1.EXTEND;
-                name_table1(name_table1.LAST) := v_name;
+                sort_table1(v_name) := v_name;
             END LOOP;
             CLOSE cur_author_name;
         END LOOP;
         CLOSE cur_author_id2;
-
-        --Sort author names in table--
-        idx := name_table1.FIRST;
-        LOOP
-            --sort_table is index by varchar2--
-            sort_table1(name_table1(idx)) := name_table1(idx);
-            idx := name_table1.NEXT(idx);
-            EXIT WHEN idx IS NULL;
-        END LOOP;
 
         --Get first name in sort_table--
         v_name := sort_table1.FIRST;
