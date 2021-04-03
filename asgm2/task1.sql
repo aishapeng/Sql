@@ -105,7 +105,7 @@ BEGIN
         FETCH cur_wrote INTO v_pubid;
         EXIT WHEN cur_wrote%NOTFOUND;
         --Add publication details into table--
-        --Check if pubid is found--
+		--Check if pubid is found--
         IF v_found = 0 THEN
             --Get article details--
             IF NOT cur_article%ISOPEN THEN
@@ -178,7 +178,7 @@ BEGIN
             CLOSE cur_article;
         END IF;
 
-        --Check if pubid is found--
+		--Check if pubid is found--
         IF v_found = 0 THEN
             --Get book details--
             IF NOT cur_book%ISOPEN THEN
@@ -197,8 +197,8 @@ BEGIN
             END LOOP;
             CLOSE cur_book;
         END IF;
-
-        --Check if pubid is found--
+		
+		--Check if pubid is found--
         IF v_found = 0 THEN
             --Get journal details--
             IF NOT cur_journal%ISOPEN THEN
@@ -218,7 +218,7 @@ BEGIN
             CLOSE cur_journal;
         END IF;
 
-        --Check if pubid is found--
+		--Check if pubid is found--
         IF v_found = 0 THEN
             --Get proceedings details--
             IF NOT cur_proceedings%ISOPEN THEN
@@ -265,13 +265,13 @@ BEGIN
     FOR i IN pubid_table1.FIRST..pubid_table1.LAST LOOP
 
         --Print publication id--
-        DBMS_OUTPUT.PUT_LINE('Pubid: '|| pubid_table1(i).pubid);
+        DBMS_OUTPUT.PUT_LINE('Pubid		: '|| pubid_table1(i).pubid);
 
         --Print publication type--
-        DBMS_OUTPUT.PUT_LINE('Type: '|| pubid_table1(i).type);
+        DBMS_OUTPUT.PUT_LINE('Type		: '|| pubid_table1(i).type);
 
         --Get authors name into table--
-        DBMS_OUTPUT.PUT('Authors: ');
+        DBMS_OUTPUT.PUT('Authors		: ');
 
         --Get all authors who wrote this publication--
         IF NOT cur_author_id2%ISOPEN THEN
@@ -306,8 +306,7 @@ BEGIN
         --Get first name in sort_table--
         v_name := sort_table1.FIRST;
         LOOP
-            DBMS_OUTPUT.PUT(
-                v_name||'; ');
+            DBMS_OUTPUT.PUT(v_name||'; ');
             --Get next name in sort_table--
             v_name := sort_table1.NEXT(v_name);
             EXIT WHEN v_name IS NULL;
@@ -321,7 +320,7 @@ BEGIN
         LOOP
             FETCH cur_title INTO v_title;
             EXIT WHEN cur_title%NOTFOUND;
-            DBMS_OUTPUT.PUT_LINE('Title: '|| v_title);
+            DBMS_OUTPUT.PUT_LINE('Title		: '|| v_title);
         END LOOP;
         CLOSE cur_title;
 
@@ -343,10 +342,10 @@ BEGIN
                             FETCH cur_book INTO v_book;
                             EXIT WHEN cur_book%NOTFOUND;
                             DBMS_OUTPUT.PUT_LINE('Appears In Book: '|| v_article.appearsin);
-                            DBMS_OUTPUT.PUT_LINE('Start Page: '|| v_article.startpage);
-                            DBMS_OUTPUT.PUT_LINE('End Page: '|| v_article.endpage);
-                            DBMS_OUTPUT.PUT_LINE('Publisher: '|| v_book.publisher);
-                            DBMS_OUTPUT.PUT_LINE('Year: '|| v_book.year);
+                            DBMS_OUTPUT.PUT_LINE('Start Page	: '|| v_article.startpage);
+                            DBMS_OUTPUT.PUT_LINE('End Page	: '|| v_article.endpage);
+                            DBMS_OUTPUT.PUT_LINE('Publisher	: '|| v_book.publisher);
+                            DBMS_OUTPUT.PUT_LINE('Year		: '|| v_book.year);
                             v_found := 1;
                         END LOOP;
                         CLOSE cur_book;
@@ -360,11 +359,11 @@ BEGIN
                             FETCH cur_journal INTO v_journal;
                             EXIT WHEN cur_journal%NOTFOUND;
                             DBMS_OUTPUT.PUT_LINE('Appears In Journal: '|| v_article.appearsin);
-                            DBMS_OUTPUT.PUT_LINE('Start Page: '|| v_article.startpage);
-                            DBMS_OUTPUT.PUT_LINE('End Page: '|| v_article.endpage);
-                            DBMS_OUTPUT.PUT_LINE('Volume: '|| v_journal.volume);
-                            DBMS_OUTPUT.PUT_LINE('Number: '|| v_journal.num);
-                            DBMS_OUTPUT.PUT_LINE('Year: '|| v_journal.year);
+                            DBMS_OUTPUT.PUT_LINE('Start Page	: '|| v_article.startpage);
+                            DBMS_OUTPUT.PUT_LINE('End Page	: '|| v_article.endpage);
+                            DBMS_OUTPUT.PUT_LINE('Volume		: '|| v_journal.volume);
+                            DBMS_OUTPUT.PUT_LINE('Number		: '|| v_journal.num);
+                            DBMS_OUTPUT.PUT_LINE('Year		: '|| v_journal.year);
                             v_found := 1;
                         END LOOP;
                         CLOSE cur_journal;
@@ -378,9 +377,9 @@ BEGIN
                             FETCH cur_proceedings INTO v_proceedings;
                             EXIT WHEN cur_proceedings%NOTFOUND;
                             DBMS_OUTPUT.PUT_LINE('Appears In Proceedings: '|| v_article.appearsin);
-                            DBMS_OUTPUT.PUT_LINE('Start Page: '|| v_article.startpage);
-                            DBMS_OUTPUT.PUT_LINE('End Page: '|| v_article.endpage);
-                            DBMS_OUTPUT.PUT_LINE('Year: '|| v_proceedings.year);
+                            DBMS_OUTPUT.PUT_LINE('Start Page	: '|| v_article.startpage);
+                            DBMS_OUTPUT.PUT_LINE('End Page	: '|| v_article.endpage);
+                            DBMS_OUTPUT.PUT_LINE('Year		: '|| v_proceedings.year);
                             v_found := 1;
                         END LOOP;
                         CLOSE cur_proceedings;
@@ -397,8 +396,8 @@ BEGIN
                 LOOP
                     FETCH cur_book INTO v_book;
                     EXIT WHEN cur_book%NOTFOUND;
-                    DBMS_OUTPUT.PUT_LINE('Publisher: '|| v_book.publisher);
-                    DBMS_OUTPUT.PUT_LINE('Year: '||v_book.year);
+                    DBMS_OUTPUT.PUT_LINE('Publisher	: '|| v_book.publisher);
+                    DBMS_OUTPUT.PUT_LINE('Year		: '||v_book.year);
                 END LOOP;
                 CLOSE cur_book;
 
@@ -410,9 +409,9 @@ BEGIN
                 LOOP
                     FETCH cur_journal INTO v_journal;
                     EXIT WHEN cur_journal%NOTFOUND;
-                    DBMS_OUTPUT.PUT_LINE('Volume: '|| v_journal.volume);
-                    DBMS_OUTPUT.PUT_LINE('Number: '||v_journal.num);   
-                    DBMS_OUTPUT.PUT_LINE('Year: '|| v_journal.year);
+                    DBMS_OUTPUT.PUT_LINE('Volume		: '|| v_journal.volume);
+                    DBMS_OUTPUT.PUT_LINE('Number		: '||v_journal.num);   
+                    DBMS_OUTPUT.PUT_LINE('Year		: '|| v_journal.year);
                 END LOOP;
                 CLOSE cur_journal;
 
@@ -432,11 +431,13 @@ BEGIN
     END LOOP;    
     
     --Print summary--
-    DBMS_OUTPUT.PUT_LINE('Proceedings: '||v_count_proceedings);   
-    DBMS_OUTPUT.PUT_LINE('Journal: '||v_count_journal); 
-    DBMS_OUTPUT.PUT_LINE('Article: '||v_count_article); 
-    DBMS_OUTPUT.PUT_LINE('Book: '||v_count_book); 
+    DBMS_OUTPUT.PUT_LINE('Proceedings	: '||v_count_proceedings);   
+    DBMS_OUTPUT.PUT_LINE('Journal		: '||v_count_journal); 
+    DBMS_OUTPUT.PUT_LINE('Article		: '||v_count_article); 
+    DBMS_OUTPUT.PUT_LINE('Book		: '||v_count_book); 
+	DBMS_OUTPUT.PUT_LINE('--------------------------------------------');
     DBMS_OUTPUT.PUT_LINE('Total Publication: '||v_total_count); 
+	DBMS_OUTPUT.PUT_LINE('--------------------------------------------');
 
 EXCEPTION
     WHEN e_noauthor THEN
