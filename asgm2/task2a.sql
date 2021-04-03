@@ -1,4 +1,4 @@
-drop table Publication_master;
+set linesize 200;
 
 CREATE TABLE publication_master(
     pubid CHAR(10),
@@ -9,7 +9,7 @@ CREATE TABLE publication_master(
     detail3 VARCHAR2(50),
     detail4 VARCHAR2(50),
     FOREIGN KEY (pubid) REFERENCES publication(pubid),
-    CONSTRAINT exist_record UNIQUE(pubid)
+    PRIMARY KEY (pubid)
 );
 
 CREATE OR REPLACE PROCEDURE merge_publication AS 
@@ -304,6 +304,8 @@ BEGIN
     END IF;
     v_found := 0;
 EXCEPTION
+    WHEN DUP_VAL_ON_INDEX THEN
+        DBMS_OUTPUT.PUT_LINE('Error: Record already exist in table.'); 
     WHEN OTHERS THEN
         DBMS_OUTPUT.PUT_LINE('Error Code = #'|| SQLCODE);
         DBMS_OUTPUT.PUT_LINE('Error Msg = '|| SQLERRM); 

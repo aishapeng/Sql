@@ -1,11 +1,11 @@
 CREATE OR REPLACE PROCEDURE print_publication 
 (p_name VARCHAR2) AS
     v_aid VARCHAR2(38);
-    v_pubid CHAR(10);
+    v_pubid varchar2(10);
     v_name VARCHAR2(22);
-    v_type CHAR(20);
-    v_title CHAR(70);
-    v_year NUMBER(38);
+    v_type VARCHAR2(20);
+    v_title VARCHAR2(70);
+    v_year NUMBER;
 
     v_count_proceedings NUMBER := 0;
     v_count_journal NUMBER := 0;
@@ -338,10 +338,18 @@ BEGIN
                         IF NOT cur_book%ISOPEN THEN
                             OPEN cur_book(v_article.appearsin);
                         END IF;
+                        IF NOT cur_title%ISOPEN THEN
+                            OPEN cur_title(v_article.appearsin);
+                        END IF;
+                        LOOP
+                            FETCH cur_title INTO v_title;
+                            EXIT WHEN cur_title%NOTFOUND;
+                        END LOOP;
+                        CLOSE cur_title;
                         LOOP
                             FETCH cur_book INTO v_book;
                             EXIT WHEN cur_book%NOTFOUND;
-                            DBMS_OUTPUT.PUT_LINE('Appears In Book: '|| v_article.appearsin);
+                            DBMS_OUTPUT.PUT_LINE('Appears In Book '|| v_article.appearsin||': '||v_title);
                             DBMS_OUTPUT.PUT_LINE('Start Page	: '|| v_article.startpage);
                             DBMS_OUTPUT.PUT_LINE('End Page	: '|| v_article.endpage);
                             DBMS_OUTPUT.PUT_LINE('Publisher	: '|| v_book.publisher);
@@ -355,10 +363,18 @@ BEGIN
                         IF NOT cur_journal%ISOPEN THEN
                             OPEN cur_journal(v_article.appearsin);
                         END IF;
+                        IF NOT cur_title%ISOPEN THEN
+                            OPEN cur_title(v_article.appearsin);
+                        END IF;
+                        LOOP
+                            FETCH cur_title INTO v_title;
+                            EXIT WHEN cur_title%NOTFOUND;
+                        END LOOP;
+                        CLOSE cur_title;
                         LOOP
                             FETCH cur_journal INTO v_journal;
                             EXIT WHEN cur_journal%NOTFOUND;
-                            DBMS_OUTPUT.PUT_LINE('Appears In Journal: '|| v_article.appearsin);
+                            DBMS_OUTPUT.PUT_LINE('Appears In Journal '|| v_article.appearsin||': '||v_title);
                             DBMS_OUTPUT.PUT_LINE('Start Page	: '|| v_article.startpage);
                             DBMS_OUTPUT.PUT_LINE('End Page	: '|| v_article.endpage);
                             DBMS_OUTPUT.PUT_LINE('Volume		: '|| v_journal.volume);
@@ -373,10 +389,18 @@ BEGIN
                         IF NOT cur_proceedings%ISOPEN THEN
                             OPEN cur_proceedings(v_article.appearsin);
                         END IF;
+                        IF NOT cur_title%ISOPEN THEN
+                            OPEN cur_title(v_article.appearsin);
+                        END IF;
+                        LOOP
+                            FETCH cur_title INTO v_title;
+                            EXIT WHEN cur_title%NOTFOUND;
+                        END LOOP;
+                        CLOSE cur_title;
                         LOOP
                             FETCH cur_proceedings INTO v_proceedings;
                             EXIT WHEN cur_proceedings%NOTFOUND;
-                            DBMS_OUTPUT.PUT_LINE('Appears In Proceedings: '|| v_article.appearsin);
+                            DBMS_OUTPUT.PUT_LINE('Appears In Proceedings '|| v_article.appearsin||': '||v_title);
                             DBMS_OUTPUT.PUT_LINE('Start Page	: '|| v_article.startpage);
                             DBMS_OUTPUT.PUT_LINE('End Page	: '|| v_article.endpage);
                             DBMS_OUTPUT.PUT_LINE('Year		: '|| v_proceedings.year);
