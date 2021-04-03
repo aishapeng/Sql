@@ -26,6 +26,8 @@ BEGIN
             v_found := 1;
             DBMS_OUTPUT.PUT_LINE('PUBID        TITLE                                                                 TYPE          APPEARS IN   START PAGE    END PAGE');
             DBMS_OUTPUT.PUT_LINE('-----------  -------------------------------------------------------------------   ----------   ------------  -----------   ----------');
+	ELSE
+		RAISE e_nopublication;
     END IF;
     CLOSE print_article_cur;
 
