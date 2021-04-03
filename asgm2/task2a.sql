@@ -9,7 +9,7 @@ CREATE TABLE publication_master(
     detail3 VARCHAR2(50),
     detail4 VARCHAR2(50),
     FOREIGN KEY (pubid) REFERENCES publication(pubid),
-    PRIMARY KEY (pubid)
+    CONSTRAINT exist_record UNIQUE(pubid)
 );
 
 CREATE OR REPLACE PROCEDURE merge_publication AS 
@@ -166,12 +166,14 @@ BEGIN
     --Print total successful insertion--
     v_total := v_counter_proceedings + v_counter_book + v_counter_journal + v_counter_article;
     DBMS_OUTPUT.NEW_LINE;
+	DBMS_OUTPUT.PUT_LINE('=============================================================');
     DBMS_OUTPUT.PUT_LINE('Total: '||v_total||' new records posted into publication_master table.');
-    DBMS_OUTPUT.PUT_LINE('----------------------------------------------------------------------');
-    DBMS_OUTPUT.PUT_LINE('Proceedings: '||v_counter_proceedings);
-    DBMS_OUTPUT.PUT_LINE('Journal: '||v_counter_journal);
-    DBMS_OUTPUT.PUT_LINE('Book: '||v_counter_book);
-    DBMS_OUTPUT.PUT_LINE('Article: '||v_counter_article);
+    DBMS_OUTPUT.PUT_LINE('=============================================================');
+    DBMS_OUTPUT.PUT_LINE('Proceedings	: '||v_counter_proceedings);
+    DBMS_OUTPUT.PUT_LINE('Journal		: '||v_counter_journal);
+    DBMS_OUTPUT.PUT_LINE('Book		: '||v_counter_book);
+    DBMS_OUTPUT.PUT_LINE('Article		: '||v_counter_article);
+	DBMS_OUTPUT.PUT_LINE('--------------------');
     DBMS_OUTPUT.NEW_LINE;
 
     --Print if any missing publication--
@@ -207,10 +209,10 @@ BEGIN
         LOOP
             FETCH cur_print_proceedings INTO v_pubid, v_title, v_type, v_year;
             EXIT WHEN cur_print_proceedings%NOTFOUND;
-            DBMS_OUTPUT.PUT_LINE(v_pubid||'   '||v_title||v_type||v_year);
+            DBMS_OUTPUT.PUT_LINE(v_pubid||'   '||v_title||v_type||'          '||v_year);
         END LOOP;
         CLOSE cur_print_proceedings;
-        DBMS_OUTPUT.NEW_LINE;
+        DBMS_OUTPUT.PUT_LINE(chr(10));
     END IF;
     v_found := 0;
 
@@ -225,7 +227,7 @@ BEGIN
     IF cur_print_journal%ROWCOUNT > 0 THEN
             v_found := 1;
             DBMS_OUTPUT.PUT_LINE('PUBID        TITLE                                                                 TYPE                VOLUME   NUM   YEAR');
-            DBMS_OUTPUT.PUT_LINE('---------    -------------------------------------------------------------------   -----------------   -------  ----  -------');
+            DBMS_OUTPUT.PUT_LINE('---------    -------------------------------------------------------------------   -----------------   -------  ------  -------');
 
     END IF;
     CLOSE cur_print_journal;
@@ -237,10 +239,10 @@ BEGIN
         LOOP
             FETCH cur_print_journal INTO v_pubid, v_title, v_type, v_volume, v_num, v_year;
             EXIT WHEN cur_print_journal%NOTFOUND;
-            DBMS_OUTPUT.PUT_LINE(v_pubid||'   '||v_title||v_type||v_volume||v_num||v_year);
+            DBMS_OUTPUT.PUT_LINE(v_pubid||'   '||v_title||v_type||'		'||v_volume||'	'||v_num||'	'||v_year);
         END LOOP;
         CLOSE cur_print_journal;
-        DBMS_OUTPUT.NEW_LINE;
+        DBMS_OUTPUT.PUT_LINE(chr(10));
     END IF;
     v_found := 0;
 
@@ -254,8 +256,8 @@ BEGIN
     END LOOP;
     IF cur_print_book%ROWCOUNT > 0 THEN
             v_found := 1;
-            DBMS_OUTPUT.PUT_LINE('PUBID        TITLE                                                                 TYPE                PUBLISHER                                        YEAR');
-            DBMS_OUTPUT.PUT_LINE('---------    -------------------------------------------------------------------   -----------------   -------------------------------------------      --------');
+            DBMS_OUTPUT.PUT_LINE('PUBID        TITLE                                                                 TYPE                PUBLISHER                                         YEAR');
+            DBMS_OUTPUT.PUT_LINE('---------    -------------------------------------------------------------------   -----------------   -----------------------------------------      --------');
     END IF;
     CLOSE cur_print_book;
 
@@ -266,10 +268,10 @@ BEGIN
         LOOP
             FETCH cur_print_book INTO v_pubid, v_title, v_type, v_publisher, v_year;
             EXIT WHEN cur_print_book%NOTFOUND;
-            DBMS_OUTPUT.PUT_LINE(v_pubid||'   '||v_title||v_type||v_publisher||v_year);
+            DBMS_OUTPUT.PUT_LINE(v_pubid||'   '||v_title||v_type||'                '||v_publisher||v_year);
         END LOOP;
         CLOSE cur_print_book;
-        DBMS_OUTPUT.NEW_LINE;
+        DBMS_OUTPUT.PUT_LINE(chr(10));
     END IF;
     v_found := 0;
 
@@ -283,8 +285,8 @@ BEGIN
     END LOOP;
     IF cur_print_article%ROWCOUNT > 0 THEN
             v_found := 1;
-            DBMS_OUTPUT.PUT_LINE('PUBID        TITLE                                                                 TYPE                APPEARS IN   START PAGE    END PAGE');
-            DBMS_OUTPUT.PUT_LINE('-----------  -------------------------------------------------------------------   -----------------   -----------  -----------   ----------');
+            DBMS_OUTPUT.PUT_LINE('PUBID        TITLE                                                                  TYPE        APPEARS IN   START PAGE     END PAGE');
+            DBMS_OUTPUT.PUT_LINE('-----------  -------------------------------------------------------------------   ----------   -----------  -----------   ----------');
     END IF;
     CLOSE cur_print_article;
 
@@ -295,10 +297,10 @@ BEGIN
         LOOP
             FETCH cur_print_article INTO v_pubid, v_title, v_type, v_appearsin, v_startpage, v_endpage;
             EXIT WHEN cur_print_article%NOTFOUND;
-            DBMS_OUTPUT.PUT_LINE(v_pubid||'   '||v_title||v_type||v_appearsin||v_startpage||'       '||v_endpage);
+            DBMS_OUTPUT.PUT_LINE(v_pubid||'   '||v_title||v_type||'      '||v_appearsin||'	  '||v_startpage||'		'||v_endpage);
         END LOOP;
         CLOSE cur_print_article;
-        DBMS_OUTPUT.NEW_LINE;
+        DBMS_OUTPUT.PUT_LINE(chr(10));
     END IF;
     v_found := 0;
 EXCEPTION
