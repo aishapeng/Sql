@@ -1,4 +1,4 @@
-set linesize 200;
+set linesize 250;
 
 CREATE TABLE publication_master(
     pubid CHAR(10),
@@ -174,7 +174,7 @@ BEGIN
     DBMS_OUTPUT.PUT_LINE('Book		: '||v_counter_book);
     DBMS_OUTPUT.PUT_LINE('Article		: '||v_counter_article);
 	DBMS_OUTPUT.PUT_LINE('--------------------');
-    DBMS_OUTPUT.NEW_LINE;
+    DBMS_OUTPUT.PUT_LINE(chr(10));
 
     --Print if any missing publication--
     IF v_missing > 0 THEN
@@ -183,7 +183,7 @@ BEGIN
         FOR i IN missing_table1.FIRST..missing_table1.LAST LOOP
             DBMS_OUTPUT.PUT_LINE('Missing Pubid '||i||': '||missing_table1(i));
         END LOOP;
-        DBMS_OUTPUT.NEW_LINE;
+        DBMS_OUTPUT.PUT_LINE(chr(10));
     END IF;
 
     --Print all posted proceedings--
@@ -226,7 +226,7 @@ BEGIN
     END LOOP;
     IF cur_print_journal%ROWCOUNT > 0 THEN
             v_found := 1;
-            DBMS_OUTPUT.PUT_LINE('PUBID        TITLE                                                                 TYPE                VOLUME   NUM   YEAR');
+            DBMS_OUTPUT.PUT_LINE('PUBID        TITLE                                                                 TYPE                VOLUME   NUM     YEAR');
             DBMS_OUTPUT.PUT_LINE('---------    -------------------------------------------------------------------   -----------------   -------  ------  -------');
 
     END IF;
@@ -257,7 +257,7 @@ BEGIN
     IF cur_print_book%ROWCOUNT > 0 THEN
             v_found := 1;
             DBMS_OUTPUT.PUT_LINE('PUBID        TITLE                                                                 TYPE                PUBLISHER                                         YEAR');
-            DBMS_OUTPUT.PUT_LINE('---------    -------------------------------------------------------------------   -----------------   -----------------------------------------      --------');
+            DBMS_OUTPUT.PUT_LINE('---------    -------------------------------------------------------------------   -----------------   -----------------------------------------         --------');
     END IF;
     CLOSE cur_print_book;
 
@@ -285,7 +285,7 @@ BEGIN
     END LOOP;
     IF cur_print_article%ROWCOUNT > 0 THEN
             v_found := 1;
-            DBMS_OUTPUT.PUT_LINE('PUBID        TITLE                                                                  TYPE        APPEARS IN   START PAGE     END PAGE');
+            DBMS_OUTPUT.PUT_LINE('PUBID        TITLE                                                                 TYPE         APPEARS IN   START PAGE    END PAGE');
             DBMS_OUTPUT.PUT_LINE('-----------  -------------------------------------------------------------------   ----------   -----------  -----------   ----------');
     END IF;
     CLOSE cur_print_article;
@@ -303,9 +303,11 @@ BEGIN
         DBMS_OUTPUT.PUT_LINE(chr(10));
     END IF;
     v_found := 0;
+
+    COMMIT;
 EXCEPTION
     WHEN DUP_VAL_ON_INDEX THEN
-        DBMS_OUTPUT.PUT_LINE('Error: Record already exist in table.'); 
+        DBMS_OUTPUT.PUT_LINE('Error: Record pubid "'||v_pubid||'" already exist in table.'); 
     WHEN OTHERS THEN
         DBMS_OUTPUT.PUT_LINE('Error Code = #'|| SQLCODE);
         DBMS_OUTPUT.PUT_LINE('Error Msg = '|| SQLERRM); 
