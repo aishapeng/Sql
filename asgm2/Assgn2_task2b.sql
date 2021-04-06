@@ -4,7 +4,7 @@ CREATE OR REPLACE PROCEDURE print_article (p_pubid CHAR) AS
 		FROM publication_master
         WHERE type = 'Article'
 		AND TRIM(detail1) = UPPER(p_pubid)
-		ORDER BY CAST(detail2 AS INT) ASC;
+		ORDER BY CAST(detail2 AS INT) ASC; --Convert to int data type first
 		
 	article_rec print_article_cur%rowtype;
 	v_found NUMBER := 0;
@@ -14,6 +14,7 @@ CREATE OR REPLACE PROCEDURE print_article (p_pubid CHAR) AS
    
 BEGIN 
    
+   	--Print all posted article--
 	IF NOT print_article_cur%ISOPEN THEN
         OPEN print_article_cur(p_pubid);
     END IF;   
@@ -27,6 +28,7 @@ BEGIN
             DBMS_OUTPUT.PUT_LINE('PUBID        TITLE                                                                 TYPE          APPEARS IN   START PAGE    END PAGE');
             DBMS_OUTPUT.PUT_LINE('-----------  -------------------------------------------------------------------   ----------   ------------  -----------   ----------');
 	ELSE
+		--If no article found--
 		RAISE e_nopublication;
     END IF;
     CLOSE print_article_cur;
