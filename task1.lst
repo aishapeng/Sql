@@ -1,0 +1,191 @@
+SQL> SET ECHO ON
+SQL> SET FEEDBACK ON
+SQL> SET LINESIZE 200
+SQL> SET PAGESIZE 200
+SQL> SET SERVEROUTPUT ON
+SQL> EXECUTE print_publication('Rene_Muller');
+Pubid		: MullerTA12                                                                                                                                                                                     
+Type		: Article                                                                                                                                                                                         
+Authors		: Gustavo_Alonso; Jens_Teubner; Rene_Muller;                                                                                                                                                   
+Title		: Sorting networks on FPGAs                                                                                                                                                                      
+Appears In Journal VLDBJ21_1 : VLDB Journal                                                                                                                                                             
+Start Page	: 1                                                                                                                                                                                          
+End Page	: 23                                                                                                                                                                                           
+Volume		: 21                                                                                                                                                                                            
+Number		: 1                                                                                                                                                                                             
+Year		: 2012                                                                                                                                                                                            
+--------------------------------------------                                                                                                                                                            
+Proceedings	: 0                                                                                                                                                                                         
+Journal		: 0                                                                                                                                                                                            
+Article		: 1                                                                                                                                                                                            
+Book		: 0                                                                                                                                                                                               
+--------------------------------------------                                                                                                                                                            
+Total Publication: 1                                                                                                                                                                                    
+--------------------------------------------                                                                                                                                                            
+
+PL/SQL procedure successfully completed.
+
+SQL> EXECUTE print_publication('Abc');
+Error: Author does not exist in database.                                                                                                                                                               
+
+PL/SQL procedure successfully completed.
+
+SQL> EXECUTE print_publication('ReNe_mULler');
+Pubid		: MullerTA12                                                                                                                                                                                     
+Type		: Article                                                                                                                                                                                         
+Authors		: Gustavo_Alonso; Jens_Teubner; Rene_Muller;                                                                                                                                                   
+Title		: Sorting networks on FPGAs                                                                                                                                                                      
+Appears In Journal VLDBJ21_1 : VLDB Journal                                                                                                                                                             
+Start Page	: 1                                                                                                                                                                                          
+End Page	: 23                                                                                                                                                                                           
+Volume		: 21                                                                                                                                                                                            
+Number		: 1                                                                                                                                                                                             
+Year		: 2012                                                                                                                                                                                            
+--------------------------------------------                                                                                                                                                            
+Proceedings	: 0                                                                                                                                                                                         
+Journal		: 0                                                                                                                                                                                            
+Article		: 1                                                                                                                                                                                            
+Book		: 0                                                                                                                                                                                               
+--------------------------------------------                                                                                                                                                            
+Total Publication: 1                                                                                                                                                                                    
+--------------------------------------------                                                                                                                                                            
+
+PL/SQL procedure successfully completed.
+
+SQL> EXECUTE print_publication('test');
+Error: Author does not exist in database.                                                                                                                                                               
+
+PL/SQL procedure successfully completed.
+
+SQL> EXECUTE print_publication('M._Tamer_Ozsu');
+Pubid		: TaoO09a                                                                                                                                                                                        
+Type		: Article                                                                                                                                                                                         
+Authors		: M._Tamer_Ozsu; Yingying_Tao;                                                                                                                                                                 
+Title		: Mining frequent itemsets in time-varying data streams                                                                                                                                          
+Appears In Proceedings CIKM2009  : Proc. 18th ACM Conference on Information and Knowledge Management                                                                                                    
+Start Page	: 1521                                                                                                                                                                                       
+End Page	: 1524                                                                                                                                                                                         
+Year		: 2009                                                                                                                                                                                            
+--------------------------------------------                                                                                                                                                            
+Pubid		: 0029498                                                                                                                                                                                        
+Type		: Book                                                                                                                                                                                            
+Authors		: M._Tamer_Ozsu; Patrick_Valduriez; Yingying_Tao;                                                                                                                                              
+Title		: Principles of Distributed Database Systems, Third Edition                                                                                                                                      
+Publisher	: Springer                                                                                                                                                                                    
+Year		: 2011                                                                                                                                                                                            
+--------------------------------------------                                                                                                                                                            
+Pubid		: CheVWOO11                                                                                                                                                                                      
+Type		: Article                                                                                                                                                                                         
+Authors		: Ben_Chin_Ooi; Gang_Chen; Hoang_Tam_Vo; M._Tamer_Ozsu; Patrick_Valduriez; Sai_Wu; Yingying_Tao;                                                                                               
+Title		: A Framework for Supporting DBMS-like Indexes in the Cloud                                                                                                                                      
+Appears In Journal PVLDB4_11 : Proceedings of the VLDB Endowment                                                                                                                                        
+Start Page	: 702                                                                                                                                                                                        
+End Page	: 713                                                                                                                                                                                          
+Volume		: 4                                                                                                                                                                                             
+Number		: 11                                                                                                                                                                                            
+Year		: 2011                                                                                                                                                                                            
+--------------------------------------------                                                                                                                                                            
+Pubid		: ZouMCOZ11                                                                                                                                                                                      
+Type		: Article                                                                                                                                                                                         
+Authors		: Ben_Chin_Ooi; Dongyan_Zhao; Gang_Chen; Hoang_Tam_Vo; Jinghui_Mo; Lei_Chen; Lei_Zou; M._Tamer_Ozsu; Patrick_Valduriez; Sai_Wu; Yingying_Tao;                                                  
+Title		: gStore: Answering SPARQL Queries via Subgraph Matching                                                                                                                                         
+Appears In Journal PVLDB4_8  : Proceedings of the VLDB Endowment                                                                                                                                        
+Start Page	: 482                                                                                                                                                                                        
+End Page	: 493                                                                                                                                                                                          
+Volume		: 4                                                                                                                                                                                             
+Number		: 8                                                                                                                                                                                             
+Year		: 2011                                                                                                                                                                                            
+--------------------------------------------                                                                                                                                                            
+Pubid		: ZouCOZ12                                                                                                                                                                                       
+Type		: Article                                                                                                                                                                                         
+Authors		: Ben_Chin_Ooi; Dongyan_Zhao; Gang_Chen; Hoang_Tam_Vo; Jinghui_Mo; Lei_Chen; Lei_Zou; M._Tamer_Ozsu; Patrick_Valduriez; Sai_Wu; Yingying_Tao;                                                  
+Title		: Answering pattern match queries in large graph databases via graph...                                                                                                                          
+Appears In Journal VLDBJ21_1 : VLDB Journal                                                                                                                                                             
+Start Page	: 97                                                                                                                                                                                         
+End Page	: 120                                                                                                                                                                                          
+Volume		: 21                                                                                                                                                                                            
+Number		: 1                                                                                                                                                                                             
+Year		: 2012                                                                                                                                                                                            
+--------------------------------------------                                                                                                                                                            
+Proceedings	: 0                                                                                                                                                                                         
+Journal		: 0                                                                                                                                                                                            
+Article		: 4                                                                                                                                                                                            
+Book		: 1                                                                                                                                                                                               
+--------------------------------------------                                                                                                                                                            
+Total Publication: 5                                                                                                                                                                                    
+--------------------------------------------                                                                                                                                                            
+
+PL/SQL procedure successfully completed.
+
+SQL> EXECUTE print_publication('Patrick_Valduriez');
+Pubid		: 0029498                                                                                                                                                                                        
+Type		: Book                                                                                                                                                                                            
+Authors		: M._Tamer_Ozsu; Patrick_Valduriez;                                                                                                                                                            
+Title		: Principles of Distributed Database Systems, Third Edition                                                                                                                                      
+Publisher	: Springer                                                                                                                                                                                    
+Year		: 2011                                                                                                                                                                                            
+--------------------------------------------                                                                                                                                                            
+Proceedings	: 0                                                                                                                                                                                         
+Journal		: 0                                                                                                                                                                                            
+Article		: 0                                                                                                                                                                                            
+Book		: 1                                                                                                                                                                                               
+--------------------------------------------                                                                                                                                                            
+Total Publication: 1                                                                                                                                                                                    
+--------------------------------------------                                                                                                                                                            
+
+PL/SQL procedure successfully completed.
+
+SQL> EXECUTE print_publication('David_DeHaan');
+Pubid		: AlucDB12                                                                                                                                                                                       
+Type		: Article                                                                                                                                                                                         
+Authors		: David_DeHaan; Gunes_Aluc; Ivan_T._Bowman;                                                                                                                                                    
+Title		: Parametric plan caching using density-based clustering                                                                                                                                         
+Appears In Proceedings ICDE2012  : Proc. IEEE 29th International Conference on Data Engineering                                                                                                         
+Start Page	: 402                                                                                                                                                                                        
+End Page	: 413                                                                                                                                                                                          
+Year		: 2012                                                                                                                                                                                            
+--------------------------------------------                                                                                                                                                            
+Proceedings	: 0                                                                                                                                                                                         
+Journal		: 0                                                                                                                                                                                            
+Article		: 1                                                                                                                                                                                            
+Book		: 0                                                                                                                                                                                               
+--------------------------------------------                                                                                                                                                            
+Total Publication: 1                                                                                                                                                                                    
+--------------------------------------------                                                                                                                                                            
+
+PL/SQL procedure successfully completed.
+
+SQL> EXECUTE print_publication('Lei_Zou');
+Pubid		: ZouMCOZ11                                                                                                                                                                                      
+Type		: Article                                                                                                                                                                                         
+Authors		: Dongyan_Zhao; Jinghui_Mo; Lei_Chen; Lei_Zou; M._Tamer_Ozsu;                                                                                                                                  
+Title		: gStore: Answering SPARQL Queries via Subgraph Matching                                                                                                                                         
+Appears In Journal PVLDB4_8  : Proceedings of the VLDB Endowment                                                                                                                                        
+Start Page	: 482                                                                                                                                                                                        
+End Page	: 493                                                                                                                                                                                          
+Volume		: 4                                                                                                                                                                                             
+Number		: 8                                                                                                                                                                                             
+Year		: 2011                                                                                                                                                                                            
+--------------------------------------------                                                                                                                                                            
+Pubid		: ZouCOZ12                                                                                                                                                                                       
+Type		: Article                                                                                                                                                                                         
+Authors		: Dongyan_Zhao; Jinghui_Mo; Lei_Chen; Lei_Zou; M._Tamer_Ozsu;                                                                                                                                  
+Title		: Answering pattern match queries in large graph databases via graph...                                                                                                                          
+Appears In Journal VLDBJ21_1 : VLDB Journal                                                                                                                                                             
+Start Page	: 97                                                                                                                                                                                         
+End Page	: 120                                                                                                                                                                                          
+Volume		: 21                                                                                                                                                                                            
+Number		: 1                                                                                                                                                                                             
+Year		: 2012                                                                                                                                                                                            
+--------------------------------------------                                                                                                                                                            
+Proceedings	: 0                                                                                                                                                                                         
+Journal		: 0                                                                                                                                                                                            
+Article		: 2                                                                                                                                                                                            
+Book		: 0                                                                                                                                                                                               
+--------------------------------------------                                                                                                                                                            
+Total Publication: 2                                                                                                                                                                                    
+--------------------------------------------                                                                                                                                                            
+
+PL/SQL procedure successfully completed.
+
+SQL> SPOOL OFF
