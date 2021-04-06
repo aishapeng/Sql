@@ -1,0 +1,50 @@
+SQL> SET ECHO ON
+SQL> SET FEEDBACK ON
+SQL> SET LINESIZE 200
+SQL> SET PAGESIZE 200
+SQL> SET SERVEROUTPUT ON
+SQL> EXECUTE print_article('VLDBJ21_1');
+PUBID        TITLE                                                                 TYPE          APPEARS IN   START PAGE    END PAGE                                                                    
+-----------  -------------------------------------------------------------------   ----------   ------------  -----------   ----------                                                                  
+MullerTA12   Sorting networks on FPGAs                                             Article       VLDBJ21_1         1		23                                                                                
+GeorgouK12   Distributed similarity estimation using derived dimensions            Article       VLDBJ21_1         25		50                                                                               
+DeutchM12    Type inference and type checking for queries over execution traces    Article       VLDBJ21_1         51		68                                                                               
+CheeZLZL12   Continuous reverse k nearest neighbors queries in Euclidean space...  Article       VLDBJ21_1         69		95                                                                               
+ZouCOZ12     Answering pattern match queries in large graph databases via graph... Article       VLDBJ21_1         97		120                                                                              
+HartmaKL12   Design by example for SQL table definitions with functional...        Article       VLDBJ21_1         121		144                                                                             
+GuravSDB12   Which sort orders are interesting                                     Article       VLDBJ21_1         145		165                                                                             
+
+PL/SQL procedure successfully completed.
+
+SQL> EXECUTE print_article('VLdbJ21_1');
+PUBID        TITLE                                                                 TYPE          APPEARS IN   START PAGE    END PAGE                                                                    
+-----------  -------------------------------------------------------------------   ----------   ------------  -----------   ----------                                                                  
+MullerTA12   Sorting networks on FPGAs                                             Article       VLDBJ21_1         1		23                                                                                
+GeorgouK12   Distributed similarity estimation using derived dimensions            Article       VLDBJ21_1         25		50                                                                               
+DeutchM12    Type inference and type checking for queries over execution traces    Article       VLDBJ21_1         51		68                                                                               
+CheeZLZL12   Continuous reverse k nearest neighbors queries in Euclidean space...  Article       VLDBJ21_1         69		95                                                                               
+ZouCOZ12     Answering pattern match queries in large graph databases via graph... Article       VLDBJ21_1         97		120                                                                              
+HartmaKL12   Design by example for SQL table definitions with functional...        Article       VLDBJ21_1         121		144                                                                             
+GuravSDB12   Which sort orders are interesting                                     Article       VLDBJ21_1         145		165                                                                             
+
+PL/SQL procedure successfully completed.
+
+SQL> EXECUTE print_article('vldbj21_1');
+PUBID        TITLE                                                                 TYPE          APPEARS IN   START PAGE    END PAGE                                                                    
+-----------  -------------------------------------------------------------------   ----------   ------------  -----------   ----------                                                                  
+MullerTA12   Sorting networks on FPGAs                                             Article       VLDBJ21_1         1		23                                                                                
+GeorgouK12   Distributed similarity estimation using derived dimensions            Article       VLDBJ21_1         25		50                                                                               
+DeutchM12    Type inference and type checking for queries over execution traces    Article       VLDBJ21_1         51		68                                                                               
+CheeZLZL12   Continuous reverse k nearest neighbors queries in Euclidean space...  Article       VLDBJ21_1         69		95                                                                               
+ZouCOZ12     Answering pattern match queries in large graph databases via graph... Article       VLDBJ21_1         97		120                                                                              
+HartmaKL12   Design by example for SQL table definitions with functional...        Article       VLDBJ21_1         121		144                                                                             
+GuravSDB12   Which sort orders are interesting                                     Article       VLDBJ21_1         145		165                                                                             
+
+PL/SQL procedure successfully completed.
+
+SQL> EXECUTE print_article('0029498');
+Error: No article found in this publication.                                                                                                                                                            
+
+PL/SQL procedure successfully completed.
+
+SQL> SPOOL OFF

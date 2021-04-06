@@ -1,0 +1,378 @@
+SQL> SET ECHO ON
+SQL> SET FEEDBACK ON
+SQL> SET LINESIZE 250
+SQL> SET PAGESIZE 200
+SQL> SET SERVEROUTPUT ON
+SQL> @ c:\sql\assignment2\task2a
+SQL> set linesize 250;
+SQL> 
+SQL> CREATE TABLE publication_master(
+  2  	 pubid CHAR(10),
+  3  	 title VARCHAR2(70),
+  4  	 type VARCHAR2(20),
+  5  	 detail1 VARCHAR2(50),
+  6  	 detail2 VARCHAR2(50),
+  7  	 detail3 VARCHAR2(50),
+  8  	 detail4 VARCHAR2(50),
+  9  	 FOREIGN KEY (pubid) REFERENCES publication(pubid),
+ 10  	 PRIMARY KEY (pubid)
+ 11  );
+
+Table created.
+
+SQL> 
+SQL> CREATE OR REPLACE PROCEDURE merge_publication AS
+  2  	 v_pubid VARCHAR2(10);
+  3  	 v_title VARCHAR2(70);
+  4  	 v_type VARCHAR2(20);
+  5  	 v_year NUMBER;
+  6  	 v_volume NUMBER;
+  7  	 v_num NUMBER;
+  8  	 v_publisher VARCHAR2(50);
+  9  	 v_appearsin VARCHAR2(15);
+ 10  	 v_startpage NUMBER;
+ 11  	 v_endpage NUMBER;
+ 12  
+ 13  	 v_found NUMBER := 0;
+ 14  	 v_missing NUMBER := 0;
+ 15  	 v_total NUMBER := 0;
+ 16  	 v_counter_proceedings NUMBER := 0;
+ 17  	 v_counter_journal NUMBER := 0;
+ 18  	 v_counter_book NUMBER := 0;
+ 19  	 v_counter_article NUMBER := 0;
+ 20  
+ 21  	 TYPE missing_table IS TABLE OF VARCHAR2(10);
+ 22  	 missing_table1 missing_table := missing_table();
+ 23  
+ 24  	 CURSOR cur_publication IS
+ 25  	     SELECT *
+ 26  	     FROM publication;
+ 27  
+ 28  	 CURSOR cur_proceedings(p_pubid CHAR) IS
+ 29  	     SELECT year
+ 30  	     FROM proceedings
+ 31  	     WHERE pubid = p_pubid;
+ 32  
+ 33  	 CURSOR cur_journal(p_pubid CHAR) IS
+ 34  	     SELECT volume, num, year
+ 35  	     FROM journal
+ 36  	     WHERE pubid = p_pubid;
+ 37  
+ 38  	 CURSOR cur_book(p_pubid CHAR) IS
+ 39  	     SELECT publisher, year
+ 40  	     FROM book
+ 41  	     WHERE pubid = p_pubid;
+ 42  
+ 43  	 CURSOR cur_article(p_pubid CHAR) IS
+ 44  	     SELECT appearsin, startpage, endpage
+ 45  	     FROM article
+ 46  	     WHERE pubid = p_pubid;
+ 47  
+ 48  	 CURSOR cur_print_proceedings IS
+ 49  	     SELECT pubid, title, type, detail1
+ 50  	     FROM publication_master
+ 51  	     WHERE type = 'Proceedings';
+ 52  
+ 53  	 CURSOR cur_print_journal IS
+ 54  	     SELECT pubid, title, type, detail1, detail2, detail3
+ 55  	     FROM publication_master
+ 56  	     WHERE type = 'Journal';
+ 57  
+ 58  	 CURSOR cur_print_book IS
+ 59  	     SELECT pubid, title, type, detail1, detail2
+ 60  	     FROM publication_master
+ 61  	     WHERE type = 'Book';
+ 62  
+ 63  	 CURSOR cur_print_article IS
+ 64  	     SELECT pubid, title, type, detail1, detail2, detail3
+ 65  	     FROM publication_master
+ 66  	     WHERE type = 'Article';
+ 67  
+ 68  BEGIN
+ 69  	 --Get all publication id--
+ 70  	 IF NOT cur_publication%ISOPEN THEN
+ 71  	     OPEN cur_publication;
+ 72  	 END IF;
+ 73  	 LOOP
+ 74  	     FETCH cur_publication INTO v_pubid, v_title;
+ 75  	     EXIT WHEN cur_publication%NOTFOUND;
+ 76  	     v_found := 0;
+ 77  
+ 78  	     --Insert proceedings details--
+ 79  	     IF v_found = 0 THEN
+ 80  		 IF NOT cur_proceedings%ISOPEN THEN
+ 81  		     OPEN cur_proceedings(v_pubid);
+ 82  		 END IF;
+ 83  		 LOOP
+ 84  		     FETCH cur_proceedings INTO v_year;
+ 85  		     EXIT WHEN cur_proceedings%NOTFOUND;
+ 86  		     INSERT INTO publication_master(pubid, title, type, detail1)
+ 87  			 VALUES(v_pubid, v_title, 'Proceedings', v_year);
+ 88  		     v_counter_proceedings := v_counter_proceedings+1;
+ 89  		     v_found := 1;
+ 90  		 END LOOP;
+ 91  		 CLOSE cur_proceedings;
+ 92  	     END IF;
+ 93  
+ 94  	     --Insert journal details--
+ 95  	     IF v_found = 0 THEN
+ 96  		 IF NOT cur_journal%ISOPEN THEN
+ 97  		     OPEN cur_journal(v_pubid);
+ 98  		 END IF;
+ 99  		 LOOP
+100  		     FETCH cur_journal INTO v_volume, v_num, v_year;
+101  		     EXIT WHEN cur_journal%NOTFOUND;
+102  		     INSERT INTO publication_master(pubid, title, type, detail1, detail2, detail3)
+103  			 VALUES(v_pubid, v_title, 'Journal', v_volume, v_num, v_year);
+104  		     v_counter_journal := v_counter_journal+1;
+105  		     v_found := 1;
+106  		 END LOOP;
+107  		 CLOSE cur_journal;
+108  	     END IF;
+109  
+110  	     --Insert book details--
+111  	     IF v_found = 0 THEN
+112  		 IF NOT cur_book%ISOPEN THEN
+113  		     OPEN cur_book(v_pubid);
+114  		 END IF;
+115  		 LOOP
+116  		     FETCH cur_book INTO v_publisher, v_year;
+117  		     EXIT WHEN cur_book%NOTFOUND;
+118  		     INSERT INTO publication_master(pubid, title, type, detail1, detail2)
+119  			 VALUES(v_pubid, v_title, 'Book', v_publisher, v_year);
+120  		     v_counter_book := v_counter_book+1;
+121  		     v_found := 1;
+122  		 END LOOP;
+123  		 CLOSE cur_book;
+124  	     END IF;
+125  
+126  	     --Insert article details--
+127  	     IF v_found = 0 THEN
+128  		 IF NOT cur_article%ISOPEN THEN
+129  		     OPEN cur_article(v_pubid);
+130  		 END IF;
+131  		 LOOP
+132  		     FETCH cur_article INTO v_appearsin, v_startpage, v_endpage;
+133  		     EXIT WHEN cur_article%NOTFOUND;
+134  		     INSERT INTO publication_master(pubid, title, type, detail1, detail2, detail3)
+135  			 VALUES(v_pubid, v_title, 'Article', v_appearsin, v_startpage, v_endpage);
+136  		     v_counter_article := v_counter_article+1;
+137  		     v_found := 1;
+138  		 END LOOP;
+139  		 CLOSE cur_article;
+140  	     END IF;
+141  
+142  	     --Check missing publication--
+143  	     IF v_found = 0 THEN
+144  		 missing_table1.EXTEND;
+145  		 missing_table1(missing_table1.LAST) := v_pubid;
+146  		 v_missing := v_missing+1;
+147  	     END IF;
+148  
+149  	 END LOOP;
+150  	 CLOSE cur_publication;
+151  
+152  	 --Print total successful insertion--
+153  	 v_total := v_counter_proceedings + v_counter_book + v_counter_journal + v_counter_article;
+154  	 DBMS_OUTPUT.NEW_LINE;
+155  	 DBMS_OUTPUT.PUT_LINE('=============================================================');
+156  	 DBMS_OUTPUT.PUT_LINE('Total: '||v_total||' new records posted into publication_master table.');
+157  	 DBMS_OUTPUT.PUT_LINE('=============================================================');
+158  	 DBMS_OUTPUT.PUT_LINE('Proceedings   : '||v_counter_proceedings);
+159  	 DBMS_OUTPUT.PUT_LINE('Journal	     : '||v_counter_journal);
+160  	 DBMS_OUTPUT.PUT_LINE('Book	 : '||v_counter_book);
+161  	 DBMS_OUTPUT.PUT_LINE('Article	     : '||v_counter_article);
+162  	 DBMS_OUTPUT.PUT_LINE('--------------------');
+163  	 DBMS_OUTPUT.PUT_LINE(chr(10));
+164  
+165  	 --Print if any missing publication--
+166  	 IF v_missing > 0 THEN
+167  	     DBMS_OUTPUT.PUT_LINE('Insert Fail: '||v_missing||' publication(s) with missing details.');
+168  	     DBMS_OUTPUT.PUT_LINE('-----------------------------------------------------------------');
+169  	     FOR i IN missing_table1.FIRST..missing_table1.LAST LOOP
+170  		 DBMS_OUTPUT.PUT_LINE('Missing Pubid '||i||': '||missing_table1(i));
+171  	     END LOOP;
+172  	     DBMS_OUTPUT.PUT_LINE(chr(10));
+173  	 END IF;
+174  
+175  	 --Print all posted proceedings--
+176  	 IF NOT cur_print_proceedings%ISOPEN THEN
+177  	     OPEN cur_print_proceedings;
+178  	 END IF;
+179  
+180  	 LOOP
+181  	     FETCH cur_print_proceedings INTO v_pubid, v_title, v_type, v_year;
+182  	     EXIT WHEN cur_print_proceedings%NOTFOUND;
+183  	 END LOOP;
+184  	 IF cur_print_proceedings%ROWCOUNT > 0 THEN
+185  		 v_found := 1;
+186  		 DBMS_OUTPUT.PUT_LINE('PUBID	    TITLE								  TYPE		      YEAR');
+187  		 DBMS_OUTPUT.PUT_LINE('--------     -------------------------------------------------------------------   -----------------   --------');
+188  	 END IF;
+189  	 CLOSE cur_print_proceedings;
+190  
+191  	 IF v_found = 1 THEN
+192  	     IF NOT cur_print_proceedings%ISOPEN THEN
+193  		 OPEN cur_print_proceedings;
+194  	     END IF;
+195  	     LOOP
+196  		 FETCH cur_print_proceedings INTO v_pubid, v_title, v_type, v_year;
+197  		 EXIT WHEN cur_print_proceedings%NOTFOUND;
+198  		 DBMS_OUTPUT.PUT_LINE(v_pubid||'   '||v_title||v_type||'	  '||v_year);
+199  	     END LOOP;
+200  	     CLOSE cur_print_proceedings;
+201  	     DBMS_OUTPUT.PUT_LINE(chr(10));
+202  	 END IF;
+203  	 v_found := 0;
+204  
+205  	 --Print all posted journal--
+206  	 IF NOT cur_print_journal%ISOPEN THEN
+207  	     OPEN cur_print_journal;
+208  	 END IF;
+209  	 LOOP
+210  	     FETCH cur_print_journal INTO v_pubid, v_title, v_type, v_volume, v_num, v_year;
+211  	     EXIT WHEN cur_print_journal%NOTFOUND;
+212  	 END LOOP;
+213  	 IF cur_print_journal%ROWCOUNT > 0 THEN
+214  		 v_found := 1;
+215  		 DBMS_OUTPUT.PUT_LINE('PUBID	    TITLE								  TYPE		      VOLUME   NUM     YEAR');
+216  		 DBMS_OUTPUT.PUT_LINE('---------    -------------------------------------------------------------------   -----------------   -------  ------  -------');
+217  
+218  	 END IF;
+219  	 CLOSE cur_print_journal;
+220  
+221  	 IF v_found = 1 THEN
+222  	     IF NOT cur_print_journal%ISOPEN THEN
+223  		 OPEN cur_print_journal;
+224  	     END IF;
+225  	     LOOP
+226  		 FETCH cur_print_journal INTO v_pubid, v_title, v_type, v_volume, v_num, v_year;
+227  		 EXIT WHEN cur_print_journal%NOTFOUND;
+228  		 DBMS_OUTPUT.PUT_LINE(v_pubid||'   '||v_title||v_type||'     '||v_volume||'  '||v_num||' '||v_year);
+229  	     END LOOP;
+230  	     CLOSE cur_print_journal;
+231  	     DBMS_OUTPUT.PUT_LINE(chr(10));
+232  	 END IF;
+233  	 v_found := 0;
+234  
+235  	 --Print all posted book--
+236  	 IF NOT cur_print_book%ISOPEN THEN
+237  	     OPEN cur_print_book;
+238  	 END IF;
+239  	 LOOP
+240  	     FETCH cur_print_book INTO v_pubid, v_title, v_type, v_publisher, v_year;
+241  	     EXIT WHEN cur_print_book%NOTFOUND;
+242  	 END LOOP;
+243  	 IF cur_print_book%ROWCOUNT > 0 THEN
+244  		 v_found := 1;
+245  		 DBMS_OUTPUT.PUT_LINE('PUBID	    TITLE								  TYPE		      PUBLISHER 					YEAR');
+246  		 DBMS_OUTPUT.PUT_LINE('---------    -------------------------------------------------------------------   -----------------   ----------------------------------------- 	--------');
+247  	 END IF;
+248  	 CLOSE cur_print_book;
+249  
+250  	 IF v_found = 1 THEN
+251  	     IF NOT cur_print_book%ISOPEN THEN
+252  		 OPEN cur_print_book;
+253  	     END IF;
+254  	     LOOP
+255  		 FETCH cur_print_book INTO v_pubid, v_title, v_type, v_publisher, v_year;
+256  		 EXIT WHEN cur_print_book%NOTFOUND;
+257  		 DBMS_OUTPUT.PUT_LINE(v_pubid||'   '||v_title||v_type||'		'||v_publisher||v_year);
+258  	     END LOOP;
+259  	     CLOSE cur_print_book;
+260  	     DBMS_OUTPUT.PUT_LINE(chr(10));
+261  	 END IF;
+262  	 v_found := 0;
+263  
+264  	 --Print all posted article--
+265  	 IF NOT cur_print_article%ISOPEN THEN
+266  	     OPEN cur_print_article;
+267  	 END IF;
+268  	 LOOP
+269  	     FETCH cur_print_article INTO v_pubid, v_title, v_type, v_appearsin, v_startpage, v_endpage;
+270  	     EXIT WHEN cur_print_article%NOTFOUND;
+271  	 END LOOP;
+272  	 IF cur_print_article%ROWCOUNT > 0 THEN
+273  		 v_found := 1;
+274  		 DBMS_OUTPUT.PUT_LINE('PUBID	    TITLE								  TYPE	       APPEARS IN   START PAGE	  END PAGE');
+275  		 DBMS_OUTPUT.PUT_LINE('-----------  -------------------------------------------------------------------   ----------   -----------  -----------   ----------');
+276  	 END IF;
+277  	 CLOSE cur_print_article;
+278  
+279  	 IF v_found = 1 THEN
+280  	     IF NOT cur_print_article%ISOPEN THEN
+281  		 OPEN cur_print_article;
+282  	     END IF;
+283  	     LOOP
+284  		 FETCH cur_print_article INTO v_pubid, v_title, v_type, v_appearsin, v_startpage, v_endpage;
+285  		 EXIT WHEN cur_print_article%NOTFOUND;
+286  		 DBMS_OUTPUT.PUT_LINE(v_pubid||'   '||v_title||v_type||'      '||v_appearsin||'    '||v_startpage||'	 '||v_endpage);
+287  	     END LOOP;
+288  	     CLOSE cur_print_article;
+289  	     DBMS_OUTPUT.PUT_LINE(chr(10));
+290  	 END IF;
+291  	 v_found := 0;
+292  
+293  	 COMMIT;
+294  EXCEPTION
+295  	 WHEN DUP_VAL_ON_INDEX THEN
+296  	     DBMS_OUTPUT.PUT_LINE('Error: Record pubid "'||v_pubid||'" already exist in table.');
+297  	 WHEN OTHERS THEN
+298  	     DBMS_OUTPUT.PUT_LINE('Error Code = #'|| SQLCODE);
+299  	     DBMS_OUTPUT.PUT_LINE('Error Msg = '|| SQLERRM);
+300  END;
+301  /
+
+Procedure created.
+
+SQL> EXECUTE merge_publication
+=============================================================                                                                                                                                                                                             
+Total: 20 new records posted into publication_master table.                                                                                                                                                                                               
+=============================================================                                                                                                                                                                                             
+Proceedings   : 3                                                                                                                                                                                                                                         
+Journal       : 3                                                                                                                                                                                                                                         
+Book      : 1                                                                                                                                                                                                                                             
+Article       : 13                                                                                                                                                                                                                                        
+--------------------                                                                                                                                                                                                                                      
+
+                                                                                                                                                                                                                                                         
+PUBID        TITLE                                                                 TYPE                YEAR                                                                                                                                               
+--------     -------------------------------------------------------------------   -----------------   --------                                                                                                                                           
+ICDE2011     Proc. IEEE 28th International Conference on Data Engineering          Proceedings          2011                                                                                                                                              
+ICDE2012     Proc. IEEE 29th International Conference on Data Engineering          Proceedings          2012                                                                                                                                              
+CIKM2009     Proc. 18th ACM Conference on Information and Knowledge Management     Proceedings          2009                                                                                                                                              
+
+                                                                                                                                                                                                                                                         
+PUBID        TITLE                                                                 TYPE                VOLUME   NUM     YEAR                                                                                                                              
+---------    -------------------------------------------------------------------   -----------------   -------  ------  -------                                                                                                                           
+VLDBJ21_1    VLDB Journal                                                          Journal     21  1 2012                                                                                                                                                 
+PVLDB4_8     Proceedings of the VLDB Endowment                                     Journal     4  8 2011                                                                                                                                                  
+PVLDB4_11    Proceedings of the VLDB Endowment                                     Journal     4  11 2011                                                                                                                                                 
+
+                                                                                                                                                                                                                                                         
+PUBID        TITLE                                                                 TYPE                PUBLISHER                                         YEAR                                                                                             
+---------    -------------------------------------------------------------------   -----------------   -----------------------------------------         --------                                                                                         
+0029498      Principles of Distributed Database Systems, Third Edition             Book                Springer                                          2011                                                                                             
+
+                                                                                                                                                                                                                                                         
+PUBID        TITLE                                                                 TYPE         APPEARS IN   START PAGE    END PAGE                                                                                                                       
+-----------  -------------------------------------------------------------------   ----------   -----------  -----------   ----------                                                                                                                     
+MullerTA12   Sorting networks on FPGAs                                             Article      VLDBJ21_1     1     23                                                                                                                                    
+GeorgouK12   Distributed similarity estimation using derived dimensions            Article      VLDBJ21_1     25     50                                                                                                                                   
+DeutchM12    Type inference and type checking for queries over execution traces    Article      VLDBJ21_1     51     68                                                                                                                                   
+CheeZLZL12   Continuous reverse k nearest neighbors queries in Euclidean space...  Article      VLDBJ21_1     69     95                                                                                                                                   
+ZouCOZ12     Answering pattern match queries in large graph databases via graph... Article      VLDBJ21_1     97     120                                                                                                                                  
+HartmaKL12   Design by example for SQL table definitions with functional...        Article      VLDBJ21_1     121     144                                                                                                                                 
+GuravSDB12   Which sort orders are interesting                                     Article      VLDBJ21_1     145     165                                                                                                                                 
+AlucDB12     Parametric plan caching using density-based clustering                Article      ICDE2012      402     413                                                                                                                                 
+Graefe11     Robust query processing                                               Article      ICDE2011      1361     1361                                                                                                                               
+GraefeK11    Modern B-tree techniques                                              Article      ICDE2011      1370     1373                                                                                                                               
+ZouMCOZ11    gStore: Answering SPARQL Queries via Subgraph Matching                Article      PVLDB4_8      482     493                                                                                                                                 
+CheVWOO11    A Framework for Supporting DBMS-like Indexes in the Cloud             Article      PVLDB4_11     702     713                                                                                                                                 
+TaoO09a      Mining frequent itemsets in time-varying data streams                 Article      CIKM2009      1521     1524                                                                                                                               
+
+                                                                                                                                                                                                                                                         
+
+PL/SQL procedure successfully completed.
+
+SQL> SPOOL OFF
